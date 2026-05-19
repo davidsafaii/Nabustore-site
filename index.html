@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NabuStore - AI Inference Storage</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --border: #1e293b;
+    --accent: #3b82f6;
+    --accent-dim: #1e3a5f;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #10b981;
+    --purple: #8b5cf6;
+    --orange: #f59e0b;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(180deg, #0f1729 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero .tagline {
+    font-size: 1.25rem;
+    color: var(--text-dim);
+    max-width: 640px;
+    margin: 0 auto 32px;
+  }
+
+  .hero .badges {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .badge .dot.green  { background: var(--green); }
+  .badge .dot.blue   { background: var(--accent); }
+  .badge .dot.purple { background: var(--purple); }
+  .badge .dot.orange { background: var(--orange); }
+
+  .stats {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat { text-align: center; }
+  .stat .num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat .label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Screenshot ───────────────────────────────────────────────── */
+  .screenshot-wrap {
+    max-width: 960px;
+    margin: 40px auto 0;
+  }
+
+  .screenshot-wrap img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  }
+
+  .screenshot-caption {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+
+  /* ── Architecture stack ───────────────────────────────────────── */
+  .arch-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .arch-section { grid-template-columns: 1fr; }
+  }
+
+  .arch-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .arch-layer {
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .arch-layer .arch-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    min-width: 130px;
+  }
+
+  .arch-layer .arch-items {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .arch-layer.purple { border-color: #7c3aed; background: rgba(124,58,237,0.08); }
+  .arch-layer.purple .arch-label { color: #a78bfa; }
+  .arch-layer.blue   { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+  .arch-layer.blue .arch-label { color: #60a5fa; }
+  .arch-layer.green  { border-color: #10b981; background: rgba(16,185,129,0.08); }
+  .arch-layer.green .arch-label { color: #34d399; }
+  .arch-layer.orange { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+  .arch-layer.orange .arch-label { color: #fbbf24; }
+
+  .arch-connector {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    padding: 2px 0;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .info-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .info-card h4.green  { color: #34d399; }
+  .info-card h4.orange { color: #fbbf24; }
+
+  .info-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .info-card li {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    padding: 4px 0;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .info-card li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Comparison table ─────────────────────────────────────────── */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 32px;
+  }
+
+  .comp-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .comp-table th.bad-h { color: var(--red); }
+  .comp-table th.good-h { color: var(--green); }
+
+  .comp-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+
+  .comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .comp-table .attr {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 14%;
+  }
+
+  .comp-table .bad { color: #f87171; width: 43%; }
+  .comp-table .good { color: #34d399; width: 43%; }
+
+  /* ── Section layout ───────────────────────────────────────────── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 64px 24px;
+  }
+
+  .section h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .section .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  /* ── Technique cards ──────────────────────────────────────────── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card {
+    cursor: pointer;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  .card .icon.blue   { background: #1e3a5f; color: #60a5fa; }
+  .card .icon.green  { background: #064e3b; color: #34d399; }
+  .card .icon.purple { background: #3b1f6e; color: #a78bfa; }
+  .card .icon.orange { background: #78350f; color: #fbbf24; }
+  .card .icon.red    { background: #7f1d1d; color: #f87171; }
+
+  .card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    flex: 1;
+    margin-bottom: 16px;
+  }
+
+  .card .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .card .tag {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(59,130,246,0.1);
+    color: #60a5fa;
+    font-weight: 500;
+  }
+
+  .card .arrow {
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 12px;
+    font-weight: 600;
+  }
+
+  /* ── Architecture overview ────────────────────────────────────── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .arch-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .arch-item .tier {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .arch-item .name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .arch-item .latency {
+    font-size: 0.8rem;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  footer a:hover { text-decoration: underline; }
+
+  /* ── Modal ────────────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .modal-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .modal-body {
+    width: 100%;
+    height: calc(90vh - 50px);
+    border: none;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2.2rem; }
+    .stats { gap: 24px; }
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ──────────────────────────────────────────────────────── -->
+<div class="hero">
+  <h1>NabuStore</h1>
+  <p class="tagline">
+    Kubernetes-native AI inference storage built for horizontal scalability.
+    Handles model weights, KV cache blobs, and checkpoints across distributed
+    GPU clusters with sub-microsecond metadata lookups.
+  </p>
+
+  <div class="badges">
+    <span class="badge"><span class="dot green"></span> Apache 2.0</span>
+    <span class="badge"><span class="dot blue"></span> Go 1.24+</span>
+    <span class="badge"><span class="dot purple"></span> Kubernetes Native</span>
+    <span class="badge"><span class="dot orange"></span> Plugin Architecture</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="num">&lt;300ns</div>
+      <div class="label">CXL Index Lookup</div>
+    </div>
+    <div class="stat">
+      <div class="num">EC 8+2</div>
+      <div class="label">Erasure Coding</div>
+    </div>
+    <div class="stat">
+      <div class="num">400 Gb/s</div>
+      <div class="label">RDMA Fabric</div>
+    </div>
+    <div class="stat">
+      <div class="num">5.8 TB</div>
+      <div class="label">NVMe per Node</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Dashboard Screenshot ──────────────────────────────────────── -->
+<div class="hero">
+  <div class="screenshot-wrap">
+    <img src="nabustoreui.jpeg" alt="NabuStore Dashboard — cluster ring visualization, topology graph, and node metrics">
+    <p class="screenshot-caption">Live cluster dashboard with consistent hash ring, topology graph, and real-time node metrics</p>
+  </div>
+</div>
+
+<!-- ── Traditional vs AI Storage ──────────────────────────────────── -->
+<div class="section">
+  <h2>Traditional Storage Is Not AI Storage</h2>
+  <p class="subtitle">
+    They share the word "storage." They share almost nothing else.
+  </p>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th class="bad-h">Traditional Enterprise Storage</th>
+        <th class="good-h">AI-Native Storage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="attr">I/O Pattern</td>
+        <td class="bad">Random reads and writes. Applications depend on in-place modification, POSIX locking, and byte-range updates.</td>
+        <td class="good">Write-once / read-many. Model weights, checkpoints, and training samples are immutable blobs. No random writes needed.</td>
+      </tr>
+      <tr>
+        <td class="attr">Protocol</td>
+        <td class="bad">NFS, iSCSI, SMB — designed for spinning disk over TCP. Kernel-mediated I/O with multiple context switches per operation.</td>
+        <td class="good">NVMe-oF over RDMA, GPUDirect Storage, CXL. Kernel-bypassed via DPDK/SPDK. Zero-copy from NVMe directly into GPU HBM.</td>
+      </tr>
+      <tr>
+        <td class="attr">Latency Target</td>
+        <td class="bad">Milliseconds acceptable. HDD-era designs persist even on all-flash arrays due to legacy software stack overhead.</td>
+        <td class="good">Microseconds required. GPU costs $30k+ — every microsecond of idle GPU is measurable dollar waste. Sub-250&micro;s is baseline.</td>
+      </tr>
+      <tr>
+        <td class="attr">Bottleneck</td>
+        <td class="bad">IOPS and capacity. Scale-up storage controllers dominate. Single-threaded I/O stacks inherited from HDD era.</td>
+        <td class="good">Bandwidth and parallelism. Thousands of GPU cores demand simultaneous access. Scale-out across commodity nodes is mandatory.</td>
+      </tr>
+      <tr>
+        <td class="attr">New Primitives</td>
+        <td class="bad">No concept of KV cache, embedding vectors, or tensor blobs. Filesystems expose bytes and blocks — not AI-meaningful data units.</td>
+        <td class="good">KV cache offload/sharing, vector embedding storage, content-addressable tensor blobs, and GPU-DMA-aligned chunking are first-class.</td>
+      </tr>
+      <tr>
+        <td class="attr">Hardware Model</td>
+        <td class="bad">Proprietary controllers (Pure DirectFlash, NetApp ONTAP ASIC). Vendor lock-in is a feature — margins depend on it.</td>
+        <td class="good">Commodity NVMe + RDMA NICs on standard x86. Software defines all performance. Hardware is fungible and replaceable.</td>
+      </tr>
+      <tr>
+        <td class="attr">Moat</td>
+        <td class="bad">Hardware, support contracts, installed base inertia. Winner-take-most dynamics already resolved (NetApp, Pure, Dell EMC).</td>
+        <td class="good">Software architecture, AI-primitive integration (NIXL, CUDA, PyTorch), protocol leadership. Category not yet decided.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Architecture ──────────────────────────────────────────────── -->
+<div class="section">
+  <h2>Architecture: Blob-Native, Kernel-Free, GPU-Direct</h2>
+  <p class="subtitle">
+    Built from first principles — not adapted from general-purpose storage.
+  </p>
+
+  <div class="arch-section">
+    <div class="arch-stack">
+      <div class="arch-layer purple">
+        <div class="arch-label">AI Application Layer</div>
+        <div class="arch-items">vLLM &middot; PyTorch DataLoader &middot; HuggingFace &middot; RAG Pipelines</div>
+      </div>
+      <div class="arch-connector">&darr; Blob API (blob_get / blob_put / blob_stripe) &darr;</div>
+      <div class="arch-layer blue">
+        <div class="arch-label">Blob Orchestration</div>
+        <div class="arch-items">DHT key routing &middot; Stripe logic &middot; Erasure coding (ISA-L) &middot; KV cache lifecycle</div>
+      </div>
+      <div class="arch-connector">&darr; SPDK Blobstore + DPDK transport primitives &darr;</div>
+      <div class="arch-layer green">
+        <div class="arch-label">User-Space Data Path</div>
+        <div class="arch-items">SPDK NVMe driver &middot; DPDK poll-mode NIC &middot; GPUDirect Storage (cuFile) &middot; CXL memory tier</div>
+      </div>
+      <div class="arch-connector">&darr; VFIO hardware mapping (single kernel crossing) &darr;</div>
+      <div class="arch-layer orange">
+        <div class="arch-label">Commodity Hardware</div>
+        <div class="arch-items">Standard x86 servers &middot; NVMe SSDs &middot; ConnectX RDMA NICs &middot; NVIDIA GPUs</div>
+      </div>
+      <div class="arch-connector">&darr; Kubernetes Operator &darr;</div>
+      <div class="arch-layer purple">
+        <div class="arch-label">Control Plane</div>
+        <div class="arch-items">Kubernetes Operator &middot; CSI plugin &middot; Observability &middot; Multi-tenant QoS</div>
+      </div>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h4 class="green">Why Blob-Native Beats Filesystem for AI</h4>
+        <ul>
+          <li>AI I/O is write-once / read-many — POSIX random access semantics are unnecessary overhead</li>
+          <li>Blob boundaries align naturally with GPU DMA — one blob = one tensor = one DMA transfer</li>
+          <li>No inode table, no directory tree, no POSIX locking — entire filesystem metadata complexity eliminated</li>
+          <li>Content-addressable keys (token hash &rarr; KV cache blob) enable cluster-wide cache deduplication natively</li>
+          <li>SPDK Blobstore already ships this primitive — we compose, not invent</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Techniques ────────────────────────────────────────────────── -->
+<div class="section">
+  <h2>Architecture &amp; Techniques</h2>
+  <p class="subtitle">
+    Deep dives into each component of the storage stack, from GPU memory
+    to NVMe, with interactive diagrams and protocol walkthroughs.
+  </p>
+
+  <div class="cards">
+
+    <a class="card" href="ref-arch-v2.html">
+      <div class="icon blue">A</div>
+      <h3>Reference Architecture</h3>
+      <p>
+        The complete blueprint: five design principles, full software stack
+        (blob orchestration through SPDK/DPDK to hardware), four node types
+        (storage, GPU, metadata, management), three network fabrics, critical
+        data paths with latency budgets, and cluster sizing for 1k-GPU deployments.
+      </p>
+      <div class="tags">
+        <span class="tag">Full Stack</span>
+        <span class="tag">Node Types</span>
+        <span class="tag">Network Fabric</span>
+        <span class="tag">Sizing</span>
+      </div>
+      <div class="arrow">View reference architecture &rarr;</div>
+    </a>
+
+    <div class="card" onclick="openModal('Storage Node Architecture', 'storage_node_architecture.html')">
+      <div class="icon blue">N</div>
+      <h3>Storage Node Architecture</h3>
+      <p>
+        Complete hardware and software stack of a NabuStore node: vLLM integration,
+        CXL-backed Robin Hood index, content-addressed blob store, DHT ring with
+        150 vnodes, and the three-plane network topology (GPU IB, replication
+        Ethernet, inference).
+      </p>
+      <div class="tags">
+        <span class="tag">CXL DIMM</span>
+        <span class="tag">SPDK</span>
+        <span class="tag">DHT Ring</span>
+        <span class="tag">vLLM</span>
+      </div>
+      <div class="arrow">View architecture diagram &rarr;</div>
+    </div>
+
+    <div class="card" onclick="openModal('Blob Transfer via NVMe-oF &amp; RDMA', 'blob_transfer_nvmeof_rdma.html')">
+      <div class="icon green">R</div>
+      <h3>Blob Transfer via NVMe-oF &amp; RDMA</h3>
+      <p>
+        Zero-copy GPU blob retrieval: NIXL request triggers DHT lookup,
+        NVMe-oF target registration, GPU HBM3e registered as RDMA memory
+        region, then direct RDMA Write from NVMe DMA buffer through
+        InfiniBand NDR 400 Gb/s fabric to GPU memory. No CPU copies.
+      </p>
+      <div class="tags">
+        <span class="tag">NVMe-oF</span>
+        <span class="tag">RDMA</span>
+        <span class="tag">BlueField-3</span>
+        <span class="tag">GPUDirect</span>
+      </div>
+      <div class="arrow">View data path &rarr;</div>
+    </div>
+
+    <div class="card" onclick="openModal('DPDK Blob Replication Pipeline', 'dpdk_blob_replication.html')">
+      <div class="icon purple">D</div>
+      <h3>DPDK Blob Replication Pipeline</h3>
+      <p>
+        Userspace replication using DPDK poll-mode drivers: EC shards encoded
+        with ISA-L, wrapped in huge-page DMA buffers, dispatched via
+        rte_eth_tx_burst over ConnectX-7 200 GbE. Dedicated replication VLAN
+        on Arista 7060CX3 fabric, zero-copy receive path.
+      </p>
+      <div class="tags">
+        <span class="tag">DPDK</span>
+        <span class="tag">ISA-L</span>
+        <span class="tag">Zero-Copy</span>
+        <span class="tag">200 GbE</span>
+      </div>
+      <div class="arrow">View replication pipeline &rarr;</div>
+    </div>
+
+    <div class="card" onclick="openModal('EC 4+2 Blob Write Pipeline', 'ec42_blob_write_pipeline.html')">
+      <div class="icon orange">E</div>
+      <h3>EC 4+2 Blob Write Pipeline</h3>
+      <p>
+        Step-by-step erasure-coded write: 4 MB blob split into 4 data shards,
+        ISA-L AVX-512 GF(2^8) Cauchy encoding produces 2 parity shards,
+        DHT ring maps each shard to a distinct node, SPDK blobstore writes
+        via PCIe 5.0 DMA, 6-way ACK confirms stripe durability.
+      </p>
+      <div class="tags">
+        <span class="tag">Reed-Solomon</span>
+        <span class="tag">AVX-512</span>
+        <span class="tag">PCIe 5.0</span>
+        <span class="tag">6-Node Stripe</span>
+      </div>
+      <div class="arrow">View write pipeline &rarr;</div>
+    </div>
+
+    <a class="card" href="plugin_arch_docs.html">
+      <div class="icon red">P</div>
+      <h3>Plugin Architecture</h3>
+      <p>
+        Three-tier extensibility model: Tier 1 static registry (init()-based,
+        zero overhead), Tier 2 gRPC out-of-process (vendor binaries over UDS),
+        Tier 3 hardware auto-detection. Server vendors supply drivers without
+        modifying core code. Full API reference and vendor plugin guide.
+      </p>
+      <div class="tags">
+        <span class="tag">Tier 1: In-Process</span>
+        <span class="tag">Tier 2: gRPC</span>
+        <span class="tag">Tier 3: Auto-Detect</span>
+      </div>
+      <div class="arrow">View plugin guide &rarr;</div>
+    </a>
+
+  </div>
+</div>
+
+<!-- ── Storage Tiers ────────────────────────────────────────────── -->
+<div class="section">
+  <h2>Storage Tier Hierarchy</h2>
+  <p class="subtitle">
+    Three-tier caching from DRAM through CXL memory to NVMe, with automatic
+    promotion and demotion based on access patterns.
+  </p>
+
+  <div class="arch-grid">
+    <div class="arch-item">
+      <div class="tier">L1 &mdash; Hot</div>
+      <div class="name">DRAM</div>
+      <div class="latency">~100 ns</div>
+    </div>
+    <div class="arch-item">
+      <div class="tier">L2 &mdash; Warm</div>
+      <div class="name">CXL Memory</div>
+      <div class="latency">~200&ndash;300 ns</div>
+    </div>
+    <div class="arch-item">
+      <div class="tier">L3 &mdash; Cold</div>
+      <div class="name">NVMe SSD</div>
+      <div class="latency">~100 &micro;s</div>
+    </div>
+    <div class="arch-item">
+      <div class="tier">Index</div>
+      <div class="name">Robin Hood Map</div>
+      <div class="latency">CXL-backed mmap</div>
+    </div>
+    <div class="arch-item">
+      <div class="tier">Data Plane</div>
+      <div class="name">RDMA / DPDK</div>
+      <div class="latency">&lt;2 &micro;s wire</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────────── -->
+<footer>
+  <p>
+    NabuStore &mdash; Apache 2.0 &mdash;
+    <a href="https://github.com/nabustore/nabustore">GitHub</a>
+  </p>
+</footer>
+
+<!-- ── Modal ─────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title"></span>
+      <button class="modal-close" onclick="closeModal()" title="Close (Esc)">&times;</button>
+    </div>
+    <iframe class="modal-body" id="modal-iframe"></iframe>
+  </div>
+</div>
+
+<script>
+  function openModal(title, src) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-iframe').src = src;
+    document.getElementById('modal-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    var overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('active');
+    document.getElementById('modal-iframe').src = '';
+    document.body.style.overflow = '';
+  }
+
+  function closeModalOnBackdrop(e) {
+    if (e.target === document.getElementById('modal-overlay')) {
+      closeModal();
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+
+</body>
+</html>

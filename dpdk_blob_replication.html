@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;padding:16px;background:#fff;color:#1a1a1a}
+@media(prefers-color-scheme:dark){body{background:#1a1a1a;color:#e2e2e2}}
+.fl{opacity:0;transition:opacity .35s}.fl.on{opacity:1}
+.hl{opacity:0;transition:opacity .3s;pointer-events:none}.hl.on{opacity:.3}
+@keyframes da{to{stroke-dashoffset:-30}}.da{animation:da .7s linear infinite}
+svg text{font-family:sans-serif}
+.ctrl{display:flex;align-items:center;gap:8px;margin:10px 0 0;flex-wrap:wrap}
+button{padding:5px 14px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;color:#1a1a1a;cursor:pointer;font-size:13px}
+@media(prefers-color-scheme:dark){button{border-color:#444;background:#2a2a2a;color:#e2e2e2}}
+button:disabled{opacity:.4;cursor:default}
+.card{margin:8px 0 0;padding:10px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;min-height:88px}
+@media(prefers-color-scheme:dark){.card{background:#222;border-color:#333}}
+#ct{font-size:11px;font-weight:500;color:#888;margin-bottom:3px}
+#ci{font-size:13px;font-weight:500;margin-bottom:5px}
+#cc{font-family:monospace;font-size:12px;white-space:pre;line-height:1.55}
+#sn{font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<svg width="100%" viewBox="0 0 680 290" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.th{font-size:14px;font-weight:500}.ts{font-size:12px;opacity:.8}
+.c-teal>rect{fill:#E1F5EE;stroke:#0F6E56;stroke-width:.5}
+.c-teal .th{fill:#085041}.c-teal .ts{fill:#0F6E56}
+.c-amber>rect{fill:#FAEEDA;stroke:#854F0B;stroke-width:.5}
+.c-amber .th{fill:#633806}.c-amber .ts{fill:#854F0B}
+.c-gray>rect{fill:#F1EFE8;stroke:#5F5E5A;stroke-width:.5}
+.c-gray .th{fill:#444441}.c-gray .ts{fill:#5F5E5A}
+.sb{fill:#fff;stroke:#ccc;stroke-width:.5}
+@media(prefers-color-scheme:dark){
+.c-teal>rect{fill:#085041;stroke:#5DCAA5}
+.c-teal .th{fill:#9FE1CB}.c-teal .ts{fill:#5DCAA5}
+.c-amber>rect{fill:#633806;stroke:#EF9F27}
+.c-amber .th{fill:#FAC775}.c-amber .ts{fill:#EF9F27}
+.c-gray>rect{fill:#444441;stroke:#B4B2A9}
+.c-gray .th{fill:#D3D1C7}.c-gray .ts{fill:#B4B2A9}
+.sb{fill:#2a2a2a;stroke:#444}
+.th,.ts{fill:#e2e2e2}
+}
+</style>
+<marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- replication fabric bar -->
+<rect x="20" y="196" width="640" height="12" rx="3" fill="#f0f0f0" stroke="#ccc" stroke-width=".5"/>
+<text x="340" y="202" text-anchor="middle" dominant-baseline="central" style="font-size:10px;opacity:.6;fill:#555">Arista 7060CX3-64D  ·  200 GbE RoCE  ·  dedicated replication plane</text>
+
+<!-- storage node 1 -->
+<g class="c-teal">
+<rect x="20" y="46" width="240" height="140" rx="10"/>
+<text class="th" x="140" y="63" text-anchor="middle" dominant-baseline="central">storage node 1</text>
+</g>
+<rect class="sb" x="30" y="74" width="220" height="46" rx="5"/>
+<text class="th" x="140" y="89" text-anchor="middle" dominant-baseline="central">EC shard buffer</text>
+<text class="ts" x="140" y="107" text-anchor="middle" dominant-baseline="central">ISA-L RS encode</text>
+<rect class="sb" x="30" y="132" width="220" height="46" rx="5"/>
+<text class="th" x="140" y="147" text-anchor="middle" dominant-baseline="central">DPDK TX</text>
+<text class="ts" x="140" y="165" text-anchor="middle" dominant-baseline="central">rte_eth_tx_burst</text>
+
+<!-- storage node 2 -->
+<g class="c-amber">
+<rect x="420" y="46" width="240" height="140" rx="10"/>
+<text class="th" x="540" y="63" text-anchor="middle" dominant-baseline="central">storage node 2</text>
+</g>
+<rect class="sb" x="430" y="74" width="220" height="46" rx="5"/>
+<text class="th" x="540" y="89" text-anchor="middle" dominant-baseline="central">DPDK RX</text>
+<text class="ts" x="540" y="107" text-anchor="middle" dominant-baseline="central">poll-mode lcore</text>
+<rect class="sb" x="430" y="132" width="220" height="46" rx="5"/>
+<text class="th" x="540" y="147" text-anchor="middle" dominant-baseline="central">SPDK blobstore</text>
+<text class="ts" x="540" y="165" text-anchor="middle" dominant-baseline="central">spdk_blob_io_write</text>
+
+<!-- NVMe -->
+<g class="c-gray">
+<rect x="460" y="218" width="160" height="38" rx="8"/>
+<text class="th" x="540" y="237" text-anchor="middle" dominant-baseline="central">NVMe SSDs</text>
+</g>
+
+<!-- highlight overlays -->
+<rect id="hl-ec"   class="hl" x="30"  y="74"  width="220" height="46" rx="5" fill="#0F6E56"/>
+<rect id="hl-tx"   class="hl" x="30"  y="132" width="220" height="46" rx="5" fill="#0F6E56"/>
+<rect id="hl-rx"   class="hl" x="430" y="74"  width="220" height="46" rx="5" fill="#854F0B"/>
+<rect id="hl-spdk" class="hl" x="430" y="132" width="220" height="46" rx="5" fill="#854F0B"/>
+<rect id="hl-nvme" class="hl" x="460" y="218" width="160" height="38" rx="8" fill="#5F5E5A"/>
+
+<!-- arrows -->
+<line id="p1" class="fl" x1="140" y1="120" x2="140" y2="132" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p2" class="fl" x1="140" y1="178" x2="140" y2="196" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p4" class="fl da" x1="140" y1="202" x2="418" y2="202" stroke="#BA7517" stroke-width="3" stroke-dasharray="10 5" marker-end="url(#a)"/>
+<path id="p5" class="fl" d="M420,202 L420,89 L430,89" fill="none" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p6" class="fl" x1="540" y1="120" x2="540" y2="132" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p7" class="fl" x1="540" y1="178" x2="540" y2="218" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<path id="p8" class="fl" d="M540,46 L540,28 L140,28 L140,46" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+
+<!-- legend -->
+<circle cx="30"  cy="275" r="5" fill="#1D9E75"/>
+<text x="40"  y="279" style="font-size:12px;fill:#666">node 1  sender</text>
+<circle cx="165" cy="275" r="5" fill="#BA7517"/>
+<text x="175" y="279" style="font-size:12px;fill:#666">node 2  receiver</text>
+<circle cx="320" cy="275" r="5" fill="#888"/>
+<text x="330" y="279" style="font-size:12px;fill:#666">NVMe</text>
+<circle cx="410" cy="275" r="5" fill="#BA7517" opacity=".7"/>
+<text x="420" y="279" style="font-size:12px;fill:#666">DPDK replication flow</text>
+</svg>
+
+<div class="ctrl">
+<button id="bp" onclick="go(-1)">← prev</button>
+<div id="dots" style="display:flex;gap:5px"></div>
+<button id="bn" onclick="go(1)">next →</button>
+<span id="sn"></span>
+</div>
+<div class="card">
+<div id="ct"></div>
+<div id="ci"></div>
+<div id="cc"></div>
+</div>
+
+<script>
+const S=[
+{t:"blob_put received; EC engine encodes shard",
+ g:"storage node 1  ·  EC engine  ·  ec/ec.go",
+ c:'shard := ec.EncodeBlob(blob, stripeIdx, 4, 2)\n// ISA-L AVX-512 GF(2⁸) RS in user space\n// output written into DPDK huge-page DMA buffer\n// no kernel involvement — pure user-space compute',
+ p:[],h:["hl-ec"]},
+{t:"DPDK wraps shard in rte_mbuf — zero copy",
+ g:"storage node 1  ·  DPDK  ·  huge-page mempool",
+ c:'mbuf := rte_pktmbuf_alloc(shard_pool)\nrte_pktmbuf_attach_extbuf(mbuf,\n    shard.DMABuf, shard.Len, &shinfo)\n// mbuf payload ptr = existing DMA buf — no memcpy',
+ p:["p1"],h:["hl-tx"]},
+{t:"rte_eth_tx_burst dispatches to ConnectX-7 Ethernet port",
+ g:"storage node 1  ·  DPDK mlx5 PMD  ·  ConnectX-7 in Ethernet mode",
+ c:'n := rte_eth_tx_burst(eth_port, tx_queue, &mbuf, 1)\n// ConnectX-7 in Ethernet/RoCE mode — NOT InfiniBand\n// NIC DMAs from huge-page directly onto 200 GbE wire',
+ p:["p1","p2"],h:["hl-tx"]},
+{t:"Packet traverses Arista 7060CX3 replication fabric",
+ g:"Arista 7060CX3-64D  ·  200 GbE  ·  isolated replication VLAN",
+ c:'// ConnectX-7 Ethernet TX → 200 GbE wire → Arista switch\n// dedicated isolated VLAN — zero contention with IB data plane\n// no ECN/PFC tuning needed: no GPU traffic on this fabric',
+ p:["p1","p2","p4"],h:[]},
+{t:"Node 2 DPDK poll-mode lcore receives packet",
+ g:"storage node 2  ·  DPDK lcore  ·  tight poll loop",
+ c:'for {  // dedicated lcore — never sleeps, no interrupt\n    n := rte_eth_rx_burst(eth_port, 0, mbufs[:], 32)\n    for i := 0; i < n; i++ {\n        handleShard(mbufs[i])  // direct mbuf payload\n    }\n}',
+ p:["p1","p2","p4","p5"],h:["hl-rx"]},
+{t:"Zero-copy handoff: rte_mbuf payload → SPDK DMA buffer",
+ g:"storage node 2  ·  shared huge-page pool",
+ c:'// DPDK and SPDK share the same huge-page allocator\n// rte_pktmbuf_mtod gives pointer into existing DMA buf\ndmaBuf  := rte_pktmbuf_mtod(mbuf, unsafe.Pointer)\nblobID  := extractBlobID(mbuf)  // from packet header',
+ p:["p1","p2","p4","p5","p6"],h:["hl-rx","hl-spdk"]},
+{t:"SPDK blobstore writes shard to NVMe — no kernel",
+ g:"storage node 2  ·  SPDK  ·  blob/spdk.go",
+ c:'blobid := spdk_blob_create_sync(bs, clusters)\nblob   := spdk_blob_open_sync(bs, blobid)\nspdk_blob_io_write(blob, ch, dmaBuf, 0, pages,\n                   writeCb, NULL)  // PCIe 5.0 DMA, poll-mode',
+ p:["p1","p2","p4","p5","p6","p7"],h:["hl-spdk","hl-nvme"]},
+{t:"Write ACK: node 2 DPDK tx_burst back to node 1",
+ g:"storage node 2 → storage node 1  ·  DPDK",
+ c:'ack := buildAckPkt(shardID, node1Addr, blobID)\nrte_eth_tx_burst(eth_port, 0, &ack, 1)\n// same ConnectX Ethernet path back over the fabric\n// node 1 DPDK RX poll loop picks it up',
+ p:["p1","p2","p4","p5","p6","p7","p8"],h:["hl-rx"]},
+{t:"Node 1 marks shard durable; EC stripe complete",
+ g:"storage node 1  ·  EC engine  ·  DHT ring",
+ c:'stripe.MarkDurable(shardIdx, node2ID)\nif stripe.AllShardsAck() {\n    blobPutComplete(blobID)\n    // return blob_put success upstream to NIXL / vLLM\n}',
+ p:["p1","p2","p4","p5","p6","p7","p8"],h:["hl-ec"]},
+];
+let cur=0;
+const dr=document.getElementById('dots');
+S.forEach((_,i)=>{const d=document.createElement('div');d.style.cssText='width:7px;height:7px;border-radius:50%;transition:background .2s;background:#ccc';dr.appendChild(d)});
+function render(){
+  document.querySelectorAll('.fl').forEach(e=>e.classList.remove('on'));
+  for(let i=0;i<=cur;i++) S[i].p.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.querySelectorAll('.hl').forEach(e=>e.classList.remove('on'));
+  S[cur].h.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.getElementById('ct').textContent=S[cur].g;
+  document.getElementById('ci').textContent=S[cur].t;
+  document.getElementById('cc').textContent=S[cur].c;
+  dr.querySelectorAll('div').forEach((d,i)=>d.style.background=i===cur?'#666':'#ccc');
+  document.getElementById('bp').disabled=cur===0;
+  document.getElementById('bn').disabled=cur===S.length-1;
+  document.getElementById('sn').textContent=`${cur+1} / ${S.length}`;
+}
+function go(d){cur=Math.max(0,Math.min(S.length-1,cur+d));render()}
+render();
+</script>
+</body>
+</html>

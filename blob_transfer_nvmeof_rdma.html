@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;padding:16px;background:#fff;color:#1a1a1a}
+@media(prefers-color-scheme:dark){body{background:#1a1a1a;color:#e2e2e2}}
+.fl{opacity:0;transition:opacity .35s}.fl.on{opacity:1}
+.hl{opacity:0;transition:opacity .3s;pointer-events:none}.hl.on{opacity:.3}
+@keyframes da{to{stroke-dashoffset:-30}}.da{animation:da .7s linear infinite}
+svg text{font-family:sans-serif}
+.ctrl{display:flex;align-items:center;gap:8px;margin:10px 0 0;flex-wrap:wrap}
+button{padding:5px 14px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;color:#1a1a1a;cursor:pointer;font-size:13px}
+@media(prefers-color-scheme:dark){button{border-color:#444;background:#2a2a2a;color:#e2e2e2}}
+button:disabled{opacity:.4;cursor:default}
+.card{margin:8px 0 0;padding:10px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;min-height:88px}
+@media(prefers-color-scheme:dark){.card{background:#222;border-color:#333}}
+#ct{font-size:11px;font-weight:500;color:#888;margin-bottom:3px}
+#ci{font-size:13px;font-weight:500;margin-bottom:5px}
+#cc{font-family:monospace;font-size:12px;white-space:pre;line-height:1.55}
+#sn{font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<svg width="100%" viewBox="0 0 680 290" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.t{font-size:14px}.ts{font-size:12px;opacity:.8}.th{font-size:14px;font-weight:500}
+.c-purple>rect{fill:#EEEDFE;stroke:#534AB7;stroke-width:.5}
+.c-purple .th{fill:#3C3489}.c-purple .ts{fill:#534AB7}
+.c-teal>rect{fill:#E1F5EE;stroke:#0F6E56;stroke-width:.5}
+.c-teal .th{fill:#085041}.c-teal .ts{fill:#0F6E56}
+.c-amber>rect{fill:#FAEEDA;stroke:#854F0B;stroke-width:.5}
+.c-amber .th{fill:#633806}.c-amber .ts{fill:#854F0B}
+.c-gray>rect{fill:#F1EFE8;stroke:#5F5E5A;stroke-width:.5}
+.c-gray .th{fill:#444441}.c-gray .ts{fill:#5F5E5A}
+.sb{fill:#fff;stroke:#ccc;stroke-width:.5}
+@media(prefers-color-scheme:dark){
+.c-purple>rect{fill:#3C3489;stroke:#AFA9EC}
+.c-purple .th{fill:#CECBF6}.c-purple .ts{fill:#AFA9EC}
+.c-teal>rect{fill:#085041;stroke:#5DCAA5}
+.c-teal .th{fill:#9FE1CB}.c-teal .ts{fill:#5DCAA5}
+.c-amber>rect{fill:#633806;stroke:#EF9F27}
+.c-amber .th{fill:#FAC775}.c-amber .ts{fill:#EF9F27}
+.c-gray>rect{fill:#444441;stroke:#B4B2A9}
+.c-gray .th{fill:#D3D1C7}.c-gray .ts{fill:#B4B2A9}
+.sb{fill:#2a2a2a;stroke:#444}
+.th,.ts,.t{fill:#e2e2e2}
+}
+</style>
+<marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- IB fabric bar -->
+<rect x="15" y="216" width="650" height="12" rx="3" fill="#f0f0f0" stroke="#ccc" stroke-width=".5"/>
+<text x="340" y="222" text-anchor="middle" dominant-baseline="central" style="font-size:10px;opacity:.65;font-family:sans-serif;fill:#555">InfiniBand NDR 400 Gb/s</text>
+
+<!-- GPU node -->
+<g class="c-purple">
+<rect x="15" y="50" width="170" height="154" rx="10"/>
+<text class="th" x="100" y="67" text-anchor="middle" dominant-baseline="central">GPU node</text>
+</g>
+<rect class="sb" x="25" y="80" width="70" height="34" rx="5"/>
+<text class="ts" x="60" y="97" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">HBM3e</text>
+<rect class="sb" x="105" y="80" width="70" height="34" rx="5"/>
+<text class="ts" x="140" y="97" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">BF-3 DPU</text>
+<rect class="sb" x="25" y="124" width="150" height="34" rx="5"/>
+<text class="ts" x="100" y="141" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">cuFile / NIXL</text>
+
+<!-- storage node 1 -->
+<g class="c-teal">
+<rect x="228" y="50" width="152" height="154" rx="10"/>
+<text class="th" x="304" y="67" text-anchor="middle" dominant-baseline="central">storage node 1</text>
+</g>
+<rect class="sb" x="238" y="80" width="132" height="34" rx="5"/>
+<text class="ts" x="304" y="97" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">NIXL plugin</text>
+<rect class="sb" x="238" y="124" width="132" height="34" rx="5"/>
+<text class="ts" x="304" y="141" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">DHT ring</text>
+
+<!-- storage node 2 -->
+<g class="c-amber">
+<rect x="430" y="50" width="235" height="154" rx="10"/>
+<text class="th" x="547" y="67" text-anchor="middle" dominant-baseline="central">storage node 2</text>
+</g>
+<rect class="sb" x="440" y="80" width="215" height="34" rx="5"/>
+<text class="ts" x="547" y="97" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">NVMe-oF target</text>
+<rect class="sb" x="440" y="124" width="215" height="34" rx="5"/>
+<text class="ts" x="547" y="141" text-anchor="middle" dominant-baseline="central" style="font-family:sans-serif">SPDK blobstore</text>
+
+<!-- NVMe SSDs -->
+<g class="c-gray">
+<rect x="488" y="238" width="119" height="38" rx="6"/>
+<text class="th" x="547" y="257" text-anchor="middle" dominant-baseline="central">NVMe SSDs</text>
+</g>
+
+<!-- highlight overlays -->
+<rect id="hl-hbm"    class="hl" x="25"  y="80"  width="70"  height="34" rx="5" fill="#534AB7"/>
+<rect id="hl-bf3"    class="hl" x="105" y="80"  width="70"  height="34" rx="5" fill="#534AB7"/>
+<rect id="hl-cufile" class="hl" x="25"  y="124" width="150" height="34" rx="5" fill="#534AB7"/>
+<rect id="hl-nixl1"  class="hl" x="238" y="80"  width="132" height="34" rx="5" fill="#0F6E56"/>
+<rect id="hl-dht"    class="hl" x="238" y="124" width="132" height="34" rx="5" fill="#0F6E56"/>
+<rect id="hl-nvmeof" class="hl" x="440" y="80"  width="215" height="34" rx="5" fill="#854F0B"/>
+<rect id="hl-spdk"   class="hl" x="440" y="124" width="215" height="34" rx="5" fill="#854F0B"/>
+<rect id="hl-nvme"   class="hl" x="488" y="238" width="119" height="38" rx="6" fill="#5F5E5A"/>
+
+<!-- arrows -->
+<line id="p1" class="fl" x1="186" y1="97"  x2="226" y2="97"  stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+<line id="p3" class="fl" x1="226" y1="141" x2="186" y2="141" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+<path id="p5" class="fl" d="M100 50 L100 32 L547 32 L547 50" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+<line id="p6" class="fl" x1="547" y1="238" x2="547" y2="160" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
+<path id="p7" class="fl da" d="M547 204 L547 222 L100 222 L100 204" fill="none" stroke="#BA7517" stroke-width="3" stroke-dasharray="10 5" marker-end="url(#a)"/>
+</svg>
+
+<div class="ctrl">
+<button id="bp" onclick="go(-1)">← prev</button>
+<div id="dots" style="display:flex;gap:5px"></div>
+<button id="bn" onclick="go(1)">next →</button>
+<span id="sn"></span>
+</div>
+<div class="card">
+<div id="ct"></div>
+<div id="ci"></div>
+<div id="cc"></div>
+</div>
+
+<script>
+const S=[
+{t:"vLLM requests blob via NIXL",g:"GPU node → storage node 1",c:'nixl_get(blob_id="0xA3F2…", dst_mem=hbm_ptr)',p:["p1"],h:["hl-cufile","hl-nixl1"]},
+{t:"Node 1 DHT lookup — blob is on node 2",g:"storage node 1  ·  ring/ring.go",c:'key  := ring.Hash(blob_id)       // 128-bit keyspace\nnode := ring.Lookup(key)          // → node2:9000',p:[],h:["hl-dht"]},
+{t:"Node 1 returns NVMe-oF endpoint to GPU",g:"storage node 1 → GPU node",c:'return &NVMeoFEndpoint{\n  NQN:    "nqn.2026-01.io.nabustore:node2",\n  TRAddr: "10.0.1.2",  TRSvc:  "4420",\n}',p:["p3"],h:["hl-nixl1"]},
+{t:"GPU registers HBM3e as RDMA memory region",g:"GPU node  ·  BlueField-3 DPU  ·  rdma-core",c:'mr = ibv_reg_mr(pd, hbm_ptr, blob_size,\n       IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_LOCAL_WRITE)\n// rkey + vaddr returned to node 2',p:[],h:["hl-hbm","hl-bf3"]},
+{t:"GPU connects directly to node 2 NVMe-oF target",g:"GPU node → storage node 2  ·  IB fabric",c:'nvme connect -t rdma -a 10.0.1.2 -s 4420 \\\n  -n "nqn.2026-01.io.nabustore:node2"\n// RDMA queue pair established over InfiniBand',p:["p5"],h:["hl-nvmeof"]},
+{t:"Node 2 reads blob from NVMe via SPDK blobstore",g:"storage node 2  ·  SPDK  ·  blob/spdk.go",c:'spdk_bs_open_blob(bs, blobid, open_cb, NULL)\n// in callback:\nspdk_blob_io_read(blob, ch, dma_buf, 0, n_pages,\n                  read_cb, NULL)   // PCIe 5.0 DMA, no kernel',p:["p6"],h:["hl-spdk","hl-nvme"]},
+{t:"RDMA Write: NVMe DMA buf → IB fabric → HBM3e",g:"storage node 2 → GPU node  ·  zero CPU copies",c:'rdma_post_write(id, NULL, dma_buf, blob_size, mr,\n               0, hbm_vaddr, rkey)\n// NVMe → ConnectX-7 IB → NDR fabric → BF-3 DPU → HBM3e',p:["p7"],h:["hl-nvmeof","hl-hbm","hl-bf3"]},
+{t:"cuFile completion — tensor ready in HBM3e",g:"GPU node  ·  cuFile / NIXL",c:'ibv_poll_cq(cq, 1, &wc)    // RDMA Write complete\n// nixl_get() returns to vLLM\n// tensor pointer valid — zero extra copies made',p:[],h:["hl-hbm","hl-cufile"]}
+];
+let cur=0;
+const dr=document.getElementById('dots');
+S.forEach((_,i)=>{const d=document.createElement('div');d.style.cssText='width:7px;height:7px;border-radius:50%;transition:background .2s;background:#ccc';dr.appendChild(d)});
+function render(){
+  document.querySelectorAll('.fl').forEach(e=>e.classList.remove('on'));
+  for(let i=0;i<=cur;i++) S[i].p.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.querySelectorAll('.hl').forEach(e=>e.classList.remove('on'));
+  S[cur].h.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.getElementById('ct').textContent=S[cur].g;
+  document.getElementById('ci').textContent=S[cur].t;
+  document.getElementById('cc').textContent=S[cur].c;
+  dr.querySelectorAll('div').forEach((d,i)=>d.style.background=i===cur?'#666':'#ccc');
+  document.getElementById('bp').disabled=cur===0;
+  document.getElementById('bn').disabled=cur===S.length-1;
+  document.getElementById('sn').textContent=`${cur+1} / ${S.length}`;
+}
+function go(d){cur=Math.max(0,Math.min(S.length-1,cur+d));render()}
+render();
+</script>
+</body>
+</html>

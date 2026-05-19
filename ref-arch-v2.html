@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Storage Reference Architecture v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #020509; color: #e2e8f0;
+    padding: 20px; min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .hdr { margin-bottom: 20px; }
+  .hdr h1 { font-size: 1.35rem; font-weight: 800; color: #60a5fa; margin-bottom: 3px; }
+  .hdr p  { font-size: 0.62rem; color: #475569; letter-spacing: 0.04em; }
+
+  /* ── SECTION ── */
+  .sec-label {
+    font-size: 0.52rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: #334155;
+    border-bottom: 1px solid #0d1a2b; padding-bottom: 4px; margin: 18px 0 10px;
+  }
+
+  /* ── COLORS ── */
+  .blue   { color: #60a5fa; } .green  { color: #6ee7b7; }
+  .orange { color: #fb923c; } .purple { color: #c084fc; }
+  .yellow { color: #fbbf24; } .red    { color: #f87171; }
+  .slate  { color: #94a3b8; }
+  .bc-blue   { border-color: #1d4ed8 !important; }
+  .bc-green  { border-color: #065f46 !important; }
+  .bc-orange { border-color: #7c2d12 !important; }
+  .bc-purple { border-color: #581c87 !important; }
+  .bc-yellow { border-color: #78350f !important; }
+  .bc-red    { border-color: #7f1d1d !important; }
+
+  /* ── PHILOSOPHY BANNER ── */
+  .philosophy {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 4px;
+  }
+  .philo-card {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .philo-num  { font-size: 1.1rem; font-weight: 900; line-height: 1; margin-bottom: 3px; }
+  .philo-rule { font-size: 0.58rem; font-weight: 700; color: #e2e8f0; margin-bottom: 3px; }
+  .philo-desc { font-size: 0.55rem; color: #64748b; line-height: 1.45; }
+
+  /* ── SOFTWARE STACK ── */
+  .stack {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  .stack-col { display: flex; flex-direction: column; gap: 6px; }
+  .stack-layer {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 5px;
+    padding: 9px 11px;
+  }
+  .sl-tier  { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 3px; }
+  .sl-name  { font-size: 0.68rem; font-weight: 800; margin-bottom: 4px; }
+  .sl-items { font-size: 0.56rem; color: #64748b; line-height: 1.55; }
+  .sl-items strong { color: #94a3b8; }
+  .sl-oss   { display: inline-block; font-size: 0.47rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; margin-top: 4px; }
+  .oss-apache { background: #1c0a00; color: #fb923c; }
+  .oss-custom { background: #0a0f1c; color: #60a5fa; }
+  .oss-nvidia { background: #0a1a10; color: #6ee7b7; }
+
+  /* ── NODE GRID ── */
+  .node-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .node-card {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 6px; padding: 12px;
+  }
+  .nc-type  { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .nc-name  { font-size: 0.82rem; font-weight: 800; margin-bottom: 2px; }
+  .nc-count { font-size: 0.55rem; color: #64748b; margin-bottom: 8px; }
+  .spec { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: baseline; gap: 6px; }
+  .sk   { font-size: 0.52rem; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+  .sv   { font-size: 0.57rem; color: #94a3b8; font-weight: 600; text-align: right; }
+  .sv.hl{ color: #e2e8f0; }
+  .nc-role { font-size: 0.54rem; color: #475569; line-height: 1.5; border-top: 1px solid #0d1a2b; padding-top: 6px; margin-top: 6px; }
+
+  /* ── NETWORK FABRIC ── */
+  .fabric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .fabric-card {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 6px; padding: 11px 13px;
+  }
+  .fc-title { font-size: 0.6rem; font-weight: 800; margin-bottom: 7px; }
+  .fc-row   { display: flex; gap: 6px; margin-bottom: 4px; align-items: flex-start; }
+  .fc-dot   { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .fc-text  { font-size: 0.57rem; color: #94a3b8; line-height: 1.4; }
+  .fc-text strong { color: #cbd5e1; }
+
+  /* ── DATA PATHS ── */
+  .paths-wrap {
+    background: #040c18; border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px 16px;
+  }
+  .path-block { margin-bottom: 14px; }
+  .path-block:last-child { margin-bottom: 0; }
+  .path-title { font-size: 0.58rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .path-latency { font-size: 0.5rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .path-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+  .pn {
+    padding: 5px 9px; border-radius: 4px; border: 1px solid;
+    font-size: 0.55rem; font-weight: 700; text-align: center; line-height: 1.3;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .pa { font-size: 0.6rem; color: #1e3a5f; padding: 0 2px; flex-shrink: 0; }
+  .pl { font-size: 0.48rem; color: #334155; padding: 0 3px; white-space: nowrap; flex-shrink: 0; }
+  .path-note { font-size: 0.52rem; color: #64748b; margin-top: 5px; font-style: italic; }
+
+  /* ── ARCH STACK ── */
+  .arch-visual { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; }
+  .arch-layers { display: flex; flex-direction: column; gap: 3px; }
+  .al {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 4px;
+    padding: 7px 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .al-label { font-size: 0.58rem; font-weight: 700; min-width: 140px; }
+  .al-items { font-size: 0.55rem; color: #64748b; }
+  .al-arrow { text-align: center; font-size: 0.7rem; color: #1e3a5f; padding: 0 8px; }
+  .al-bypass { font-size: 0.47rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #052e16; color: #6ee7b7; white-space: nowrap; margin-left: auto; }
+  .al-kernel  { font-size: 0.47rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #1c0a00; color: #fb923c; white-space: nowrap; margin-left: auto; }
+
+  /* ── DURABILITY / SIZING ── */
+  .size-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .size-card {
+    background: #080f1c; border: 1px solid #1e3a5f; border-radius: 6px; padding: 12px;
+  }
+  .sc-title { font-size: 0.6rem; font-weight: 800; margin-bottom: 2px; }
+  .sc-sub   { font-size: 0.53rem; color: #64748b; margin-bottom: 8px; }
+  .sr { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #0d1a2b; }
+  .sr:last-child { border-bottom: none; }
+  .sr-k { font-size: 0.54rem; color: #64748b; }
+  .sr-v { font-size: 0.57rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>AI Storage Reference Architecture</h1>
+  <p>Constraint-free · Best-of-breed hardware · Purpose-built for AI inference &amp; training · February 2026</p>
+</div>
+
+<!-- ── DESIGN PHILOSOPHY ─────────────────────────────── -->
+<div class="sec-label">Five Non-Negotiable Design Principles</div>
+<div class="philosophy">
+  <div class="philo-card bc-purple">
+    <div class="philo-num purple">Ⅰ</div>
+    <div class="philo-rule">Kernel-Free Data Path</div>
+    <div class="philo-desc">Zero kernel involvement from NVMe to GPU HBM. SPDK + DPDK + cuFile. Every syscall is latency left on the table.</div>
+  </div>
+  <div class="philo-card bc-green">
+    <div class="philo-num green">Ⅱ</div>
+    <div class="philo-rule">Blob-Native Semantics</div>
+    <div class="philo-desc">No POSIX. No inodes. No directory tree. Blobs are the primitive. Content-addressed by token hash. POSIX is a compatibility shim, never the hot path.</div>
+  </div>
+  <div class="philo-card bc-blue">
+    <div class="philo-num blue">Ⅲ</div>
+    <div class="philo-rule">GPUDirect Everywhere</div>
+    <div class="philo-desc">NVMe → GPU HBM via RDMA DMA. CPU DRAM is never in the tensor data path. BlueField-3 DPU as RDMA peer on every GPU node.</div>
+  </div>
+  <div class="philo-card bc-orange">
+    <div class="philo-num orange">Ⅳ</div>
+    <div class="philo-rule">Commodity at Scale</div>
+    <div class="philo-desc">Standard x86 + PCIe 5.0 NVMe + ConnectX-7 NICs. No proprietary ASICs. Any node replaceable in minutes. Hardware is fungible; software defines all performance.</div>
+  </div>
+  <div class="philo-card bc-yellow">
+    <div class="philo-num yellow">Ⅴ</div>
+    <div class="philo-rule">Kubernetes-Native Control</div>
+    <div class="philo-desc">Every storage resource is a Kubernetes object. CSI, operators, and scheduler extensions — not bolted on but co-designed from day one.</div>
+  </div>
+</div>
+
+<!-- ── SOFTWARE STACK ─────────────────────────────────── -->
+<div class="sec-label">Software Stack — Open Source Foundation, No Proprietary Storage Dependencies</div>
+<div class="stack">
+
+  <div class="stack-col">
+    <div class="stack-layer bc-purple">
+      <div class="sl-tier">AI Framework Layer</div>
+      <div class="sl-name purple">NIXL + cuFile</div>
+      <div class="sl-items">
+        <strong>NIXL</strong> — NVIDIA's AI storage abstraction. Native vLLM, PyTorch, HuggingFace integration. Blob API surface exposed directly to inference engines.<br>
+        <strong>cuFile / GDS</strong> — kernel-bypass path from NVMe-oF into GPU HBM via DMA. No CPU memcopy.
+      </div>
+      <span class="sl-oss oss-nvidia">NVIDIA Open</span>
+    </div>
+    <div class="stack-layer bc-purple">
+      <div class="sl-tier">KV Cache Manager</div>
+      <div class="sl-name purple">mooncake / custom</div>
+      <div class="sl-items">
+        Disaggregated KV cache — prefill tokens stored as content-addressed blobs, shared across inference pods. Eliminates redundant prefill compute for repeated prompt prefixes.
+      </div>
+      <span class="sl-oss oss-apache">Apache 2.0</span>
+    </div>
+  </div>
+
+  <div class="stack-col">
+    <div class="stack-layer bc-blue">
+      <div class="sl-tier">Blob Orchestration</div>
+      <div class="sl-name blue">Custom Blob Engine</div>
+      <div class="sl-items">
+        <strong>DHT router</strong> — consistent-hash key → stor-node mapping. Rebalances on node add/remove.<br>
+        <strong>Blob lifecycle</strong> — tiering policy (HBM → NVMe → cold object).<br>
+        <strong>Stripe planner</strong> — EC stripe assignment, parity computation coordination.
+      </div>
+      <span class="sl-oss oss-custom">Custom · Apache 2.0</span>
+    </div>
+    <div class="stack-layer bc-blue">
+      <div class="sl-tier">Erasure Coding</div>
+      <div class="sl-name blue">ISA-L (Intel)</div>
+      <div class="sl-items">
+        SIMD-accelerated erasure coding in user space. 4+2 or 8+2 configurable. AVX-512 GF multiply — orders of magnitude faster than kernel RAID-6. No kernel MD involvement.
+      </div>
+      <span class="sl-oss oss-apache">BSD License</span>
+    </div>
+  </div>
+
+  <div class="stack-col">
+    <div class="stack-layer bc-green">
+      <div class="sl-tier">Storage Engine</div>
+      <div class="sl-name green">SPDK Blobstore</div>
+      <div class="sl-items">
+        <strong>SPDK NVMe driver</strong> — user-space PCIe 5.0 NVMe, poll-mode, zero kernel.<br>
+        <strong>SPDK Blobstore</strong> — blob primitive directly on NVMe. No VFS, no page cache.<br>
+        <strong>SPDK NVMe-oF target</strong> — serves blobs to GPU nodes via RDMA fabric.
+      </div>
+      <span class="sl-oss oss-apache">Apache 2.0</span>
+    </div>
+    <div class="stack-layer bc-green">
+      <div class="sl-tier">Network Data Path</div>
+      <div class="sl-name green">DPDK Poll-Mode</div>
+      <div class="sl-items">
+        ConnectX-7 driven by DPDK — no kernel TCP/IP. Replication and metadata traffic bypasses the OS network stack entirely. Huge pages pre-allocated at boot.
+      </div>
+      <span class="sl-oss oss-apache">Apache 2.0</span>
+    </div>
+  </div>
+
+  <div class="stack-col">
+    <div class="stack-layer bc-orange">
+      <div class="sl-tier">Control Plane</div>
+      <div class="sl-name orange">Kubernetes Operator</div>
+      <div class="sl-items">
+        Custom CSI driver — provisions blob volumes as PersistentVolumes. StorageClass maps to EC policy + tier.<br>
+        Scheduler extension — topology-aware pod placement (GPU node ↔ nearest stor-nodes).
+      </div>
+      <span class="sl-oss oss-custom">Custom · Apache 2.0</span>
+    </div>
+    <div class="stack-layer bc-orange">
+      <div class="sl-tier">Observability</div>
+      <div class="sl-name orange">DCGM + Prometheus</div>
+      <div class="sl-items">
+        DCGM exporter — GPU utilization, HBM bandwidth, NVLink saturation.<br>
+        SPDK vhost metrics — NVMe queue depth, latency percentiles per blob.<br>
+        Grafana with AI storage dashboards. Alert on GPU idle caused by storage stall.
+      </div>
+      <span class="sl-oss oss-nvidia">NVIDIA Open</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── NODE PROFILES ─────────────────────────────────── -->
+<div class="sec-label">Node Profiles — Best Available Hardware (2026)</div>
+<div class="node-grid">
+
+  <!-- Control Plane -->
+  <div class="node-card bc-blue">
+    <div class="nc-type blue">Kubernetes Control Plane</div>
+    <div class="nc-name blue">ctrl-node</div>
+    <div class="nc-count">×3 nodes — HA quorum</div>
+    <div class="spec"><span class="sk">Platform</span><span class="sv">Supermicro AS-2125HS-TNR</span></div>
+    <div class="spec"><span class="sk">CPU</span><span class="sv hl">2× AMD EPYC 9654 (96c / 192t)</span></div>
+    <div class="spec"><span class="sk">RAM</span><span class="sv">512 GB DDR5-4800 ECC RDIMM</span></div>
+    <div class="spec"><span class="sk">OS / etcd disk</span><span class="sv">2× 3.84 TB NVMe PCIe 5.0 (RAID-1)</span></div>
+    <div class="spec"><span class="sk">NIC — fabric</span><span class="sv">2× ConnectX-7 HDR/100 GbE</span></div>
+    <div class="spec"><span class="sk">NIC — mgmt</span><span class="sv">1× 25 GbE OOB + IPMI</span></div>
+    <div class="spec"><span class="sk">GPU</span><span class="sv">None</span></div>
+    <div class="nc-role">Runs: kube-apiserver, etcd (3-node Raft), CoreDNS, Cilium operator, Blob Operator controller, Prometheus, Grafana. Tainted — no user workloads.</div>
+  </div>
+
+  <!-- GPU Compute -->
+  <div class="node-card bc-purple">
+    <div class="nc-type purple">GPU Compute Node</div>
+    <div class="nc-name purple">gpu-node</div>
+    <div class="nc-count">×8–64 nodes (scale unit: 8)</div>
+    <div class="spec"><span class="sk">Platform</span><span class="sv">NVIDIA DGX H200 or HGX H200</span></div>
+    <div class="spec"><span class="sk">CPU</span><span class="sv hl">2× Intel Xeon Platinum 8592+ (64c)</span></div>
+    <div class="spec"><span class="sk">RAM</span><span class="sv">2 TB DDR5-5600 (8-channel / CPU)</span></div>
+    <div class="spec"><span class="sk">GPU</span><span class="sv hl">8× NVIDIA H200 SXM5 — 141 GB HBM3e each</span></div>
+    <div class="spec"><span class="sk">GPU interconnect</span><span class="sv">NVLink 4.0 — 900 GB/s all-reduce</span></div>
+    <div class="spec"><span class="sk">Local NVMe</span><span class="sv">8× 3.84 TB PCIe 5.0 (scratch/spill only)</span></div>
+    <div class="spec"><span class="sk">NIC — GDS fabric</span><span class="sv hl">4× ConnectX-7 NDR InfiniBand 400Gb</span></div>
+    <div class="spec"><span class="sk">DPU</span><span class="sv hl">BlueField-3 — GDS RDMA peer, RDMA write → HBM3e</span></div>
+    <div class="nc-role">Runs: vLLM, PyTorch DataLoader pods. GDS enabled via cuFile mounted into pod. All persistent tensors on stor-nodes over NDR IB. Local NVMe = scratch only — never persistent.</div>
+  </div>
+
+  <!-- Storage Node -->
+  <div class="node-card bc-green">
+    <div class="nc-type green">Storage Node (SPDK/DPDK)</div>
+    <div class="nc-name green">stor-node</div>
+    <div class="nc-count">×6–48 nodes (scale unit: 6)</div>
+    <div class="spec"><span class="sk">Platform</span><span class="sv">Supermicro SSG-211E-NE312R (2U, 32× E3.S)</span></div>
+    <div class="spec"><span class="sk">CPU</span><span class="sv hl">2× AMD EPYC 9654 (96c / 192t)</span></div>
+    <div class="spec"><span class="sk">RAM</span><span class="sv hl">1 TB DDR5 (SPDK huge-pages: 512 GB reserved)</span></div>
+    <div class="spec"><span class="sk">NVMe</span><span class="sv hl">32× Samsung PM9D3a 30.72 TB E3.S PCIe 5.0</span></div>
+    <div class="spec"><span class="sk">Raw capacity / node</span><span class="sv hl">~983 TB</span></div>
+    <div class="spec"><span class="sk">NVMe BW / node</span><span class="sv hl">~320 GB/s read, ~120 GB/s write</span></div>
+    <div class="spec"><span class="sk">NIC — data fabric</span><span class="sv hl">2× ConnectX-7 NDR IB 400Gb (RDMA)</span></div>
+    <div class="spec"><span class="sk">NIC — replication</span><span class="sv">2× ConnectX-7 200 GbE (DPDK)</span></div>
+    <div class="spec"><span class="sk">CXL memory</span><span class="sv">4× 128 GB CXL 2.0 DIMM (hot metadata tier)</span></div>
+    <div class="nc-role">Runs: SPDK NVMe-oF target daemon (user-space), DPDK replication agent, custom blob engine, ISA-L EC worker threads. Zero kernel involvement in data path. CXL DIMMs hold DHT routing table and hot blob metadata in memory-semantic tier.</div>
+  </div>
+
+  <!-- Gateway -->
+  <div class="node-card bc-orange">
+    <div class="nc-type orange">Storage Gateway</div>
+    <div class="nc-name orange">gw-node</div>
+    <div class="nc-count">×2–4 nodes (active-active pair)</div>
+    <div class="spec"><span class="sk">Platform</span><span class="sv">Supermicro AS-2125HS-TNR</span></div>
+    <div class="spec"><span class="sk">CPU</span><span class="sv">2× AMD EPYC 9554P (64c / 128t)</span></div>
+    <div class="spec"><span class="sk">RAM</span><span class="sv">512 GB DDR5-4800</span></div>
+    <div class="spec"><span class="sk">NVMe (metadata cache)</span><span class="sv">8× 3.84 TB PCIe 5.0</span></div>
+    <div class="spec"><span class="sk">NIC — uplink</span><span class="sv hl">4× ConnectX-7 400 GbE (client-facing)</span></div>
+    <div class="spec"><span class="sk">NIC — fabric</span><span class="sv">2× ConnectX-7 NDR IB 400Gb</span></div>
+    <div class="nc-role">Runs: Blob API endpoint (native blob + POSIX compatibility shim), S3-compatible adapter for ingestion pipelines, NVMe-oF initiator for clients that lack GDS. ECMP load-balanced. Active-active pair — no single point of failure.</div>
+  </div>
+
+</div>
+
+<!-- ── NETWORK FABRIC ─────────────────────────────────── -->
+<div class="sec-label">Network Fabric — Three Isolated Planes</div>
+<div class="fabric-grid">
+
+  <div class="fabric-card bc-purple">
+    <div class="fc-title purple">① Data Plane — InfiniBand NDR 400Gb (RDMA)</div>
+    <div class="fc-row"><div class="fc-dot" style="background:#c084fc"></div><div class="fc-text"><strong>Switch:</strong> NVIDIA Quantum-3 QM9700 — 64-port NDR 400Gb, 25.6 Tb/s bisection</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#c084fc"></div><div class="fc-text"><strong>Topology:</strong> 2-tier fat-tree (leaf + spine). Full bisection bandwidth. No oversubscription on this plane.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#c084fc"></div><div class="fc-text"><strong>Protocol:</strong> InfiniBand native RDMA — lower latency than RoCEv2 (no ECN/PFC tuning required, no pause frame propagation risk)</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#c084fc"></div><div class="fc-text"><strong>GPUDirect:</strong> Storage node RDMA Write → GPU node BlueField-3 → HBM3e. Fully peer-to-peer, CPU not in path.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#c084fc"></div><div class="fc-text"><strong>Latency:</strong> &lt;1 µs fabric RTT; &lt;200 µs end-to-end NVMe→GPU (target)</div></div>
+  </div>
+
+  <div class="fabric-card bc-green">
+    <div class="fc-title green">② Replication Plane — 200 GbE Ethernet (DPDK)</div>
+    <div class="fc-row"><div class="fc-dot" style="background:#6ee7b7"></div><div class="fc-text"><strong>Switch:</strong> Arista 7060CX3-64D — 64× 100GbE, dedicated to stor-node replication only</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#6ee7b7"></div><div class="fc-text"><strong>Purpose:</strong> ISA-L parity writes between storage nodes. EC stripe replication via DPDK user-space transport (no kernel TCP/IP).</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#6ee7b7"></div><div class="fc-text"><strong>Isolation:</strong> Physically separate switch, separate NIC ports on stor-nodes. Replication traffic cannot compete with GDS reads.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#6ee7b7"></div><div class="fc-text"><strong>Durability:</strong> Synchronous 3-node commit before ACK to writer. Cross-AZ async replication via 10 GbE WAN uplink from each gateway pair.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#6ee7b7"></div><div class="fc-text"><strong>Target:</strong> &lt;500 µs synchronous replication round-trip within fault domain</div></div>
+  </div>
+
+  <div class="fabric-card bc-blue">
+    <div class="fc-title blue">③ Management Plane — 25 GbE OOB + BMC</div>
+    <div class="fc-row"><div class="fc-dot" style="background:#60a5fa"></div><div class="fc-text"><strong>Switch:</strong> Dedicated OOB Arista 7020 — management traffic only, never touches data plane VLANs</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#60a5fa"></div><div class="fc-text"><strong>Kubernetes traffic:</strong> Cilium eBPF CNI, Gateway API ingress, Wireguard inter-node encryption. No kube-proxy.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#60a5fa"></div><div class="fc-text"><strong>BMC:</strong> Redfish API on all nodes. Full IPMI OOB — power cycle, console, firmware update without touching OS.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#60a5fa"></div><div class="fc-text"><strong>BGP:</strong> eBGP between leaf and spine for pod IP advertisement. No flat L2 domain — L3 from the rack top.</div></div>
+    <div class="fc-row"><div class="fc-dot" style="background:#60a5fa"></div><div class="fc-text"><strong>Security:</strong> mTLS between all components. Cilium network policy enforces zero-trust between node roles.</div></div>
+  </div>
+
+</div>
+
+<!-- ── DATA PATHS ──────────────────────────────────────── -->
+<div class="sec-label">Critical Data Paths</div>
+<div class="paths-wrap">
+
+  <div class="path-block">
+    <div class="path-title purple">
+      Path A — Inference Read: NVMe → GPU HBM (GPUDirect Storage, CPU DRAM = 0 bytes)
+      <span class="path-latency" style="background:#1a0536;color:#c084fc">Target: &lt;200 µs</span>
+    </div>
+    <div class="path-flow">
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">Samsung PM9D3a<br>NVMe E3.S<br><span style="font-size:0.45rem;color:#475569">stor-node</span></div>
+      <div class="pa">→</div><div class="pl">PCIe 5.0<br>DMA burst</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">SPDK<br>Blobstore<br><span style="font-size:0.45rem;color:#475569">user-space</span></div>
+      <div class="pa">→</div><div class="pl">DPDK<br>zero-copy</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">ConnectX-7<br>NDR 400Gb<br><span style="font-size:0.45rem;color:#475569">RDMA Write</span></div>
+      <div class="pa">→</div><div class="pl">InfiniBand<br>&lt;1 µs RTT</div>
+      <div class="pn" style="border-color:#1d4ed8;color:#60a5fa">Quantum-3<br>QM9700<br><span style="font-size:0.45rem;color:#475569">fabric</span></div>
+      <div class="pa">→</div><div class="pl">InfiniBand<br>&lt;1 µs RTT</div>
+      <div class="pn" style="border-color:#581c87;color:#c084fc">BlueField-3<br>DPU<br><span style="font-size:0.45rem;color:#475569">gpu-node GDS peer</span></div>
+      <div class="pa">→</div><div class="pl">cuFile<br>p2p DMA</div>
+      <div class="pn" style="border-color:#581c87;color:#c084fc">H200<br>HBM3e<br>141 GB<br><span style="font-size:0.45rem;color:#475569">GPU kernel ready</span></div>
+    </div>
+    <div class="path-note">CPU DRAM is never in this path. The RDMA Write from ConnectX-7 on the stor-node goes directly to the GPU's BAR-mapped HBM3e address space, brokered by BlueField-3 on the GPU node. This is the core latency claim — every other architecture that touches CPU DRAM adds 3–5× latency.</div>
+  </div>
+
+  <div class="path-block">
+    <div class="path-title green">
+      Path B — Checkpoint Write: GPU HBM → Durable NVMe (3-replica, synchronous)
+      <span class="path-latency" style="background:#052e16;color:#6ee7b7">Target: &lt;500 µs to durable</span>
+    </div>
+    <div class="path-flow">
+      <div class="pn" style="border-color:#581c87;color:#c084fc">H200 HBM3e<br><span style="font-size:0.45rem;color:#475569">gpu-node</span></div>
+      <div class="pa">→</div><div class="pl">cuFile<br>async write</div>
+      <div class="pn" style="border-color:#581c87;color:#c084fc">BlueField-3<br>DPU<br><span style="font-size:0.45rem;color:#475569">RDMA initiator</span></div>
+      <div class="pa">→</div><div class="pl">NDR IB<br>400Gb</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">SPDK<br>NVMe-oF<br>Target<br><span style="font-size:0.45rem;color:#475569">stor-node-1</span></div>
+      <div class="pa">→</div><div class="pl">blob_put<br>DHT key</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">ISA-L EC<br>encoder<br><span style="font-size:0.45rem;color:#475569">4+2 stripe</span></div>
+      <div class="pa">→</div><div class="pl">DPDK<br>repl fabric</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">NVMe SSDs<br>×3 nodes<br><span style="font-size:0.45rem;color:#475569">sync commit</span></div>
+      <div class="pa">→</div><div class="pl">ACK to<br>writer</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">✓ Durable<br><span style="font-size:0.45rem;color:#475569">3-node EC</span></div>
+    </div>
+    <div class="path-note">ISA-L EC runs in user space on the primary stor-node CPU — AVX-512 GF multiply completes a 4+2 stripe of a 1 MB blob in ~2 µs. Parity shards dispatched via DPDK over the dedicated replication fabric. ACK returned to writer only after all 3 nodes confirm NVMe write completion.</div>
+  </div>
+
+  <div class="path-block">
+    <div class="path-title orange">
+      Path C — KV Cache Offload: vLLM PagedAttention → Content-Addressed Blob Store
+      <span class="path-latency" style="background:#1c0a00;color:#fb923c">Cross-pod dedup via token hash</span>
+    </div>
+    <div class="path-flow">
+      <div class="pn" style="border-color:#581c87;color:#c084fc">vLLM<br>PagedAttn<br><span style="font-size:0.45rem;color:#475569">KV block evict</span></div>
+      <div class="pa">→</div><div class="pl">NIXL<br>blob API</div>
+      <div class="pn" style="border-color:#7c2d12;color:#fb923c">Blob Orch.<br>token hash<br>→ blob key</div>
+      <div class="pa">→</div><div class="pl">DHT lookup<br>CXL-cached</div>
+      <div class="pn" style="border-color:#7c2d12;color:#fb923c">DHT Router<br><span style="font-size:0.45rem;color:#475569">key → stor-node</span></div>
+      <div class="pa">→</div><div class="pl">cache hit?<br>skip write</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">SPDK<br>Blobstore<br><span style="font-size:0.45rem;color:#475569">stor-node</span></div>
+      <div class="pa">→</div><div class="pl">NVMe<br>write</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">NVMe SSD<br><span style="font-size:0.45rem;color:#475569">persisted</span></div>
+    </div>
+    <div class="path-note">Content-addressing is the KV cache superpower: if two inference pods computed identical prompt prefix KV blocks, the second pod finds the blob already present (same token hash → same key → cache hit). This eliminates redundant prefill compute and redundant NVMe writes cluster-wide — a capability no filesystem-based system can offer natively.</div>
+  </div>
+
+  <div class="path-block">
+    <div class="path-title blue">
+      Path D — CXL Memory Tier: Hot Metadata &amp; DHT Table (Sub-microsecond lookup)
+      <span class="path-latency" style="background:#0a1230;color:#60a5fa">Target: &lt;300 ns lookup</span>
+    </div>
+    <div class="path-flow">
+      <div class="pn" style="border-color:#7c2d12;color:#fb923c">Blob<br>Orchestrator<br><span style="font-size:0.45rem;color:#475569">lookup request</span></div>
+      <div class="pa">→</div><div class="pl">memory-<br>semantic</div>
+      <div class="pn" style="border-color:#1d4ed8;color:#60a5fa">CXL 2.0<br>DIMM ×4<br>512 GB total<br><span style="font-size:0.45rem;color:#475569">on stor-node</span></div>
+      <div class="pa">→</div><div class="pl">load/store<br>no protocol</div>
+      <div class="pn" style="border-color:#1d4ed8;color:#60a5fa">DHT routing<br>table entry<br><span style="font-size:0.45rem;color:#475569">→ NVMe addr</span></div>
+      <div class="pa">→</div><div class="pl">direct<br>dispatch</div>
+      <div class="pn" style="border-color:#065f46;color:#6ee7b7">SPDK I/O<br>submission<br><span style="font-size:0.45rem;color:#475569">queue pair</span></div>
+    </div>
+    <div class="path-note">CXL 2.0 DIMMs on each storage node act as a memory-semantic metadata tier — faster than NVMe by 10–100×, cheaper than DRAM by 3×, and capacity-persistent across reboots. The DHT routing table and hot blob metadata index live here. This eliminates a NVMe lookup hop for every blob access — critical for sub-200 µs end-to-end targets.</div>
+  </div>
+
+</div>
+
+<!-- ── SIZING PROFILES ─────────────────────────────────── -->
+<div class="sec-label">Cluster Sizing Profiles</div>
+<div class="size-grid">
+  <div class="size-card bc-blue">
+    <div class="sc-title blue">Edge Inference Lab</div>
+    <div class="sc-sub">Enterprise private AI · 16–32 GPUs</div>
+    <div class="sr"><span class="sr-k">ctrl-node</span><span class="sr-v blue">3×</span></div>
+    <div class="sr"><span class="sr-k">gpu-node (8× H200)</span><span class="sr-v purple">2–4×</span></div>
+    <div class="sr"><span class="sr-k">stor-node (32× 30 TB NVMe)</span><span class="sr-v green">6×</span></div>
+    <div class="sr"><span class="sr-k">gw-node</span><span class="sr-v orange">2×</span></div>
+    <div class="sr"><span class="sr-k">Raw NVMe</span><span class="sr-v green">~5.9 PB</span></div>
+    <div class="sr"><span class="sr-k">Usable (EC 4+2)</span><span class="sr-v green">~3.9 PB</span></div>
+    <div class="sr"><span class="sr-k">GPU HBM3e total</span><span class="sr-v purple">16–32× 141 GB</span></div>
+    <div class="sr"><span class="sr-k">Peak storage BW</span><span class="sr-v blue">~1.9 TB/s</span></div>
+    <div class="sr"><span class="sr-k">Storage : GPU ratio</span><span class="sr-v yellow">3:1</span></div>
+  </div>
+  <div class="size-card bc-green">
+    <div class="sc-title green">Mid-Scale AI Cloud</div>
+    <div class="sc-sub">Neocloud inference service · 128–256 GPUs</div>
+    <div class="sr"><span class="sr-k">ctrl-node</span><span class="sr-v blue">3×</span></div>
+    <div class="sr"><span class="sr-k">gpu-node (8× H200)</span><span class="sr-v purple">16–32×</span></div>
+    <div class="sr"><span class="sr-k">stor-node (32× 30 TB NVMe)</span><span class="sr-v green">24×</span></div>
+    <div class="sr"><span class="sr-k">gw-node</span><span class="sr-v orange">4×</span></div>
+    <div class="sr"><span class="sr-k">Raw NVMe</span><span class="sr-v green">~23.6 PB</span></div>
+    <div class="sr"><span class="sr-k">Usable (EC 4+2)</span><span class="sr-v green">~15.7 PB</span></div>
+    <div class="sr"><span class="sr-k">GPU HBM3e total</span><span class="sr-v purple">128–256× 141 GB</span></div>
+    <div class="sr"><span class="sr-k">Peak storage BW</span><span class="sr-v blue">~7.7 TB/s</span></div>
+    <div class="sr"><span class="sr-k">Storage : GPU ratio</span><span class="sr-v yellow">3:2</span></div>
+  </div>
+  <div class="size-card bc-purple">
+    <div class="sc-title purple">Hyperscale AI DC Pod</div>
+    <div class="sc-sub">Training + inference · 512–2048 GPUs</div>
+    <div class="sr"><span class="sr-k">ctrl-node</span><span class="sr-v blue">3×</span></div>
+    <div class="sr"><span class="sr-k">gpu-node (8× H200)</span><span class="sr-v purple">64–256×</span></div>
+    <div class="sr"><span class="sr-k">stor-node (32× 30 TB NVMe)</span><span class="sr-v green">48–96×</span></div>
+    <div class="sr"><span class="sr-k">gw-node</span><span class="sr-v orange">8×</span></div>
+    <div class="sr"><span class="sr-k">Raw NVMe</span><span class="sr-v green">47–94 PB</span></div>
+    <div class="sr"><span class="sr-k">Usable (EC 8+2)</span><span class="sr-v green">37–75 PB</span></div>
+    <div class="sr"><span class="sr-k">GPU HBM3e total</span><span class="sr-v purple">512–2048× 141 GB</span></div>
+    <div class="sr"><span class="sr-k">Peak storage BW</span><span class="sr-v blue">15–31 TB/s</span></div>
+    <div class="sr"><span class="sr-k">Storage : GPU ratio</span><span class="sr-v yellow">3:4 (BW-matched)</span></div>
+  </div>
+</div>
+
+</body>
+</html>

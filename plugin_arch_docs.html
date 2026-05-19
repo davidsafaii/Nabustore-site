@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nabustore Plugin Architecture</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d3d;
+  --border:#2a3347;--border2:#3a4460;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --purple:#a78bfa;--purple2:#7c3aed;--purple3:#1e1535;
+  --teal:#2dd4bf;--teal2:#0d9488;--teal3:#0a2028;
+  --blue:#60a5fa;--blue2:#2563eb;--blue3:#0d1a35;
+  --amber:#fbbf24;--amber2:#d97706;--amber3:#1f1500;
+  --green:#4ade80;--green2:#15803d;--green3:#0a1f0a;
+  --coral:#f87171;--coral2:#dc2626;--coral3:#1f0a0a;
+  --code-bg:#0d1117;--code-border:#21262d;
+  --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── Layout ── */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:3rem 4rem 6rem;max-width:960px}
+
+/* ── Sidebar ── */
+.sidebar-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.sidebar-logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--text)}
+.sidebar-logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--purple2),var(--teal2));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.sidebar-subtitle{font-size:11px;color:var(--text3);margin-top:2px}
+.nav-section{padding:1rem 1rem 0.5rem;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)}
+.nav-item{display:block;padding:0.4rem 1.5rem;font-size:13px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all 0.15s}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--purple);border-left-color:var(--purple);background:rgba(167,139,250,0.06)}
+.nav-item.sub{padding-left:2.5rem;font-size:12px}
+
+/* ── Header ── */
+.page-header{margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.breadcrumb{font-size:12px;color:var(--text3);margin-bottom:0.75rem}
+.breadcrumb span{color:var(--text3)}
+.page-title{font-size:2.25rem;font-weight:700;letter-spacing:-0.5px;color:var(--text);line-height:1.2;margin-bottom:0.75rem}
+.page-desc{font-size:16px;color:var(--text2);max-width:680px;line-height:1.7}
+.badge-row{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;border:1px solid}
+.badge-purple{background:var(--purple3);color:var(--purple);border-color:var(--purple2)}
+.badge-teal{background:var(--teal3);color:var(--teal);border-color:var(--teal2)}
+.badge-blue{background:var(--blue3);color:var(--blue);border-color:var(--blue2)}
+
+/* ── Sections ── */
+.section{margin-bottom:3.5rem;scroll-margin-top:2rem}
+h2{font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:0.75rem;letter-spacing:-0.3px}
+h3{font-size:1.1rem;font-weight:600;color:var(--text);margin:2rem 0 0.75rem;letter-spacing:-0.2px}
+h4{font-size:0.9rem;font-weight:600;color:var(--text2);margin:1.5rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.05em}
+p{color:var(--text2);margin-bottom:1rem}
+
+/* ── Callouts ── */
+.callout{border-radius:8px;padding:1rem 1.25rem;margin:1.5rem 0;border:1px solid;display:flex;gap:12px}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.callout-body{font-size:14px;color:var(--text2);line-height:1.6}
+.callout-body strong{color:var(--text);font-weight:600}
+.callout-info{background:var(--blue3);border-color:var(--blue2)}
+.callout-warning{background:var(--amber3);border-color:var(--amber2)}
+.callout-tip{background:var(--teal3);border-color:var(--teal2)}
+.callout-prereq{background:var(--purple3);border-color:var(--purple2)}
+
+/* ── Tier cards ── */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0}
+.tier-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden}
+.tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.tier-card.t1::before{background:linear-gradient(90deg,var(--purple),var(--blue))}
+.tier-card.t2::before{background:linear-gradient(90deg,var(--teal),var(--green))}
+.tier-card.t3::before{background:linear-gradient(90deg,var(--amber),var(--coral))}
+.tier-num{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem}
+.t1 .tier-num{color:var(--purple)}
+.t2 .tier-num{color:var(--teal)}
+.t3 .tier-num{color:var(--amber)}
+.tier-card h3{margin:0 0 0.5rem;font-size:1rem}
+.tier-card p{font-size:13px;color:var(--text3);margin:0 0 0.75rem}
+.tier-tag-row{display:flex;gap:6px;flex-wrap:wrap}
+.tier-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid}
+.t1 .tier-tag{background:var(--purple3);color:var(--purple);border-color:var(--purple2)}
+.t2 .tier-tag{background:var(--teal3);color:var(--teal);border-color:var(--teal2)}
+.t3 .tier-tag{background:var(--amber3);color:var(--amber);border-color:var(--amber2)}
+
+/* ── Code blocks ── */
+.code-block{margin:1rem 0 1.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--code-border)}
+.code-header{background:var(--bg3);padding:0.5rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--code-border)}
+.code-lang{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
+.code-file{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
+pre{background:var(--code-bg);padding:1.25rem;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;tab-size:4}
+code.inline{font-family:var(--font-mono);font-size:12.5px;background:var(--bg4);color:var(--teal);padding:2px 6px;border-radius:4px;border:1px solid var(--border)}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.ty{color:#ffa657}.num{color:#79c0ff}.op{color:#c9d1d9}
+
+/* ── Interface table ── */
+.iface-table{width:100%;border-collapse:collapse;margin:1rem 0 1.5rem;font-size:13px}
+.iface-table th{text-align:left;padding:8px 12px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.iface-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.iface-table tr:last-child td{border-bottom:none}
+.iface-table .method{font-family:var(--font-mono);font-size:12px;color:var(--purple)}
+.iface-table .sig{font-family:var(--font-mono);font-size:11px;color:var(--text3)}
+.iface-table .desc{color:var(--text2)}
+.iface-table tr:hover td{background:var(--bg3)}
+
+/* ── Driver table ── */
+.driver-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+.driver-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem}
+.driver-card h4{margin:0 0 0.5rem;font-size:0.85rem;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0}
+.driver-card p{font-size:13px;color:var(--text3);margin:0}
+.driver-card code{font-size:11px;color:var(--teal);background:var(--bg4);padding:2px 6px;border-radius:3px}
+.driver-card .driver-detection{font-size:11px;color:var(--amber);background:var(--amber3);padding:3px 8px;border-radius:100px;border:1px solid var(--amber2);display:inline-block;margin-top:6px}
+
+/* ── Directory tree (interactive) ── */
+.file-tree{background:var(--code-bg);border:1px solid var(--code-border);border-radius:8px;padding:1rem 1.25rem;margin:1rem 0 1.5rem;font-family:var(--font-mono);font-size:13px}
+.file-tree ul{list-style:none;padding-left:20px;margin:0}
+.file-tree>ul{padding-left:0}
+.file-tree li{position:relative;padding:2px 0}
+.file-tree li::before{content:'';position:absolute;left:-14px;top:0;bottom:0;width:1px;background:var(--code-border)}
+.file-tree>ul>li::before{display:none}
+.file-tree li::after{content:'';position:absolute;left:-14px;top:13px;width:10px;height:1px;background:var(--code-border)}
+.file-tree>ul>li::after{display:none}
+.file-tree li:last-child::before{bottom:13px}
+
+.ft-row{display:inline-flex;align-items:center;gap:6px;cursor:default;padding:1px 4px;border-radius:4px}
+.ft-row:hover{background:rgba(255,255,255,0.04)}
+.ft-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.ft-name{color:var(--text)}
+.ft-name.dir{color:var(--blue);font-weight:600}
+.ft-name.new{color:var(--green)}
+.ft-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em}
+.ft-badge.new{color:var(--green);background:var(--green3);border:1px solid var(--green2)}
+.ft-badge.moved{color:var(--amber);background:var(--amber3);border:1px solid var(--amber2)}
+.ft-badge.iface{color:var(--purple);background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25)}
+.ft-comment{color:var(--text3);font-size:11px;font-style:italic;margin-left:4px}
+
+/* collapse/expand */
+.ft-toggle{cursor:pointer;user-select:none}
+.ft-toggle>.ft-icon::before{content:'';display:inline-block;width:0;height:0;border-left:5px solid var(--blue);border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform 0.15s}
+.ft-toggle.open>.ft-icon::before{transform:rotate(90deg)}
+.ft-toggle+ul{display:none}
+.ft-toggle.open+ul{display:block}
+
+/* ── Flow diagram ── */
+.flow-row{display:flex;align-items:center;gap:0;margin:1.5rem 0}
+.flow-box{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:0.75rem 1rem;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;text-align:center;min-width:120px}
+.flow-box.purple{background:var(--purple3);border-color:var(--purple2);color:var(--purple)}
+.flow-box.teal{background:var(--teal3);border-color:var(--teal2);color:var(--teal)}
+.flow-box.amber{background:var(--amber3);border-color:var(--amber2);color:var(--amber)}
+.flow-arrow{color:var(--text3);font-size:18px;padding:0 8px;flex-shrink:0}
+.flow-fallback{color:var(--text3);font-size:11px;padding:0 8px;flex-shrink:0;text-align:center;line-height:1.3}
+
+/* ── Steps ── */
+.steps{margin:1.5rem 0}
+.step{display:flex;gap:1rem;margin-bottom:1.5rem;position:relative}
+.step::after{content:'';position:absolute;left:15px;top:34px;bottom:-1.5rem;width:1px;background:var(--border)}
+.step:last-child::after{display:none}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);z-index:1}
+.step-body{padding-top:5px;flex:1}
+.step-body h4{margin:0 0 0.25rem;font-size:14px;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0}
+.step-body p{font-size:13px;color:var(--text3);margin:0}
+
+/* ── Vendor section ── */
+.vendor-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+.vendor-option{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem}
+.vendor-option-head{font-size:13px;font-weight:600;color:var(--text);margin-bottom:0.4rem}
+.vendor-option-sub{font-size:12px;color:var(--text3);margin-bottom:0.75rem}
+.vendor-pro{font-size:11px;color:var(--teal)}
+.vendor-con{font-size:11px;color:var(--amber)}
+
+/* ── Compat matrix ── */
+.compat-table{width:100%;border-collapse:collapse;font-size:13px;margin:1rem 0 1.5rem}
+.compat-table th{background:var(--bg3);padding:8px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);text-align:left;border-bottom:1px solid var(--border)}
+.compat-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.compat-table tr:last-child td{border-bottom:none}
+.compat-table tr:hover td{background:var(--bg3)}
+.compat-y{color:var(--green)}
+.compat-n{color:var(--text3)}
+.compat-p{color:var(--amber)}
+
+/* ── ADR style ── */
+.adr-block{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin:1.5rem 0}
+.adr-kv{display:grid;grid-template-columns:110px 1fr;gap:0.4rem 1rem;font-size:13px}
+.adr-k{color:var(--text3);font-weight:600}
+.adr-v{color:var(--text2)}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">AS</div>
+      <div>
+        <div>nabustore</div>
+        <div class="sidebar-subtitle">github.com/nabustore/nabustore</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">Overview</div>
+  <a class="nav-item active" onclick="scrollTo('overview')">Plugin Architecture</a>
+  <a class="nav-item" onclick="scrollTo('principles')">Design Principles</a>
+  <a class="nav-item" onclick="scrollTo('layout')">Directory Layout</a>
+
+  <div class="nav-section">Tier Reference</div>
+  <a class="nav-item" onclick="scrollTo('tier1')">Tier 1 — Static Registry</a>
+  <a class="nav-item sub" onclick="scrollTo('registry-api')">Registry API</a>
+  <a class="nav-item sub" onclick="scrollTo('interfaces')">Subsystem Interfaces</a>
+  <a class="nav-item" onclick="scrollTo('tier2')">Tier 2 — gRPC Out-of-Process</a>
+  <a class="nav-item" onclick="scrollTo('tier3')">Tier 3 — Auto-Detection</a>
+  <a class="nav-item sub" onclick="scrollTo('autodetect')">DriverSet</a>
+
+  <div class="nav-section">Subsystems</div>
+  <a class="nav-item" onclick="scrollTo('blob-backends')">Blob Backends</a>
+  <a class="nav-item" onclick="scrollTo('transport')">Transport</a>
+  <a class="nav-item" onclick="scrollTo('ec-engines')">EC Engines</a>
+  <a class="nav-item" onclick="scrollTo('index-backends')">Index Backends</a>
+
+  <div class="nav-section">Vendor Guide</div>
+  <a class="nav-item" onclick="scrollTo('writing-plugin')">Writing a Plugin</a>
+  <a class="nav-item" onclick="scrollTo('build-composition')">Build Composition</a>
+  <a class="nav-item" onclick="scrollTo('compat')">Compatibility Matrix</a>
+
+  <div class="nav-section">Migration</div>
+  <a class="nav-item" onclick="scrollTo('migration')">Migration Path</a>
+  <a class="nav-item" onclick="scrollTo('prereqs')">Prerequisites</a>
+</nav>
+
+<!-- ─── Main ─── -->
+<main class="main">
+
+<!-- Page Header -->
+<div class="page-header" id="overview">
+  <div class="breadcrumb">nabustore / docs / <span>architecture</span></div>
+  <h1 class="page-title">Plugin Architecture</h1>
+  <p class="page-desc">A three-tier extensibility model that allows server vendors to supply hardware-specific implementations for every nabustore subsystem — without modifying core code.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Apache 2.0</span>
+    <span class="badge badge-teal">Go 1.22+</span>
+    <span class="badge badge-blue">ADR in progress</span>
+  </div>
+</div>
+
+
+<!-- ─── Design Principles ─── -->
+<div class="section" id="principles">
+  <h2>Design Principles</h2>
+  <p>The current architecture uses compile-time build tags (<code class="inline">-tags spdk</code>, <code class="inline">-tags dpdk</code>) controlled at compile time. This is a hard fork model — a vendor cannot add a backend without modifying core source. The plugin architecture replaces this with three well-defined extensibility contracts.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">&#9432;</span>
+    <div class="callout-body">
+      <strong>Core insight:</strong> The existing <code>BlobBackend</code>, <code>ec.Engine</code>, and <code>index.Index</code> interfaces are already well-designed. The problem is <em>composition</em> — how backends are selected and wired — not the interfaces themselves.
+    </div>
+  </div>
+
+  <div class="tier-grid">
+    <div class="tier-card t1">
+      <div class="tier-num">Tier 1</div>
+      <h3>Static Registry</h3>
+      <p>In-process, zero overhead. Vendors ship a Go package with an <code>init()</code> function. The binary imports what it wants via blank imports.</p>
+      <div class="tier-tag-row">
+        <span class="tier-tag">Zero overhead</span>
+        <span class="tier-tag">Go source</span>
+        <span class="tier-tag">Hot path safe</span>
+      </div>
+    </div>
+    <div class="tier-card t2">
+      <div class="tier-num">Tier 2</div>
+      <h3>gRPC Out-of-Process</h3>
+      <p>Vendor ships a standalone binary. Communicates over a Unix domain socket using the existing <code>BlobService</code> proto. No Go required.</p>
+      <div class="tier-tag-row">
+        <span class="tier-tag">Any language</span>
+        <span class="tier-tag">UDS socket</span>
+        <span class="tier-tag">Control path</span>
+      </div>
+    </div>
+    <div class="tier-card t3">
+      <div class="tier-num">Tier 3</div>
+      <h3>Auto-Detection</h3>
+      <p>Hardware probed at startup. CXL, NVMe, hugepages, DPDK PMD, ISA-L CPUID — all detected automatically. No flags required for standard hardware.</p>
+      <div class="tier-tag-row">
+        <span class="tier-tag">CXL 3.0 native</span>
+        <span class="tier-tag">Kernel modules</span>
+        <span class="tier-tag">Zero-config</span>
+      </div>
+    </div>
+  </div>
+
+  <p>The selection rule is simple: <strong>Tier 1</strong> is used for any hot-path operation (sub-microsecond reads, KV cache streaming). <strong>Tier 2</strong> is for bulk-put paths and control-plane operations where one UDS round-trip is acceptable. <strong>Tier 3</strong> is not a tier at all — it is the mechanism that selects between Tier 1 implementations at startup.</p>
+</div>
+
+
+<!-- ─── Directory Layout ─── -->
+<div class="section" id="layout">
+  <h2>Directory Layout</h2>
+  <p>Each subsystem is split into an interface package and one or more implementation sub-packages. A central <code class="inline">plugin/</code> package owns the registry. The <code class="inline">driver/</code> package owns auto-detection.</p>
+
+  <div class="file-tree">
+    <ul>
+      <li>
+        <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">nabustore/</span></div>
+        <ul>
+          <!-- plugin/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">plugin/</span> <span class="ft-badge new">new</span> <span class="ft-comment">Central registry</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">registry.go</span></div></li>
+            </ul>
+          </li>
+          <!-- blob/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">blob/</span> <span class="ft-comment">BlobBackend interface</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name">blob.go</span> <span class="ft-badge iface">interface</span></div></li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">localfs/</span> <span class="ft-badge moved">moved</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">localfs.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span> <span class="ft-comment">init() → RegisterBackend("localfs")</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">spdk/</span> <span class="ft-badge moved">moved</span> <span class="ft-comment">//go:build spdk</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">spdk.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">grpc/</span> <span class="ft-badge new">new</span> <span class="ft-comment">Tier 2 out-of-proc wrapper</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">grpc_backend.go</span></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- transport/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">transport/</span> <span class="ft-badge new">new package</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">transport.go</span> <span class="ft-badge iface">interface</span></div></li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">tcp/</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">tcp.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">dpdk/</span> <span class="ft-comment">//go:build dpdk</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">dpdk.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- ec/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">ec/</span> <span class="ft-comment">Codec interface</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name">ec.go</span> <span class="ft-badge iface">interface</span></div></li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">reedsolomon/</span> <span class="ft-badge moved">moved</span> <span class="ft-comment">Pure-Go GF(2^8)</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">rs.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">isal/</span> <span class="ft-badge new">new</span> <span class="ft-comment">//go:build isal, CGO → ISA-L</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">isal.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- index/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">index/</span> <span class="ft-comment">Index interface</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">index.go</span> <span class="ft-badge iface">interface</span></div></li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">mmap/</span> <span class="ft-badge moved">moved</span> <span class="ft-comment">Robin Hood hash map</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">mmap.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">cxl/</span> <span class="ft-badge new">new</span> <span class="ft-comment">DAX-backed, auto-detects NUMA</span></div>
+                <ul>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">cxlmem.go</span></div></li>
+                  <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">register.go</span></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- driver/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name new">driver/</span> <span class="ft-badge new">new package</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">autodetect.go</span> <span class="ft-comment">Hardware probe → DriverSet</span></div></li>
+            </ul>
+          </li>
+          <!-- cxl/ -->
+          <li>
+            <div class="ft-row ft-toggle" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">cxl/</span> <span class="ft-comment">CXL util (feeds autodetect)</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name">util.go</span></div></li>
+            </ul>
+          </li>
+          <!-- cmd/ -->
+          <li>
+            <div class="ft-row ft-toggle open" onclick="this.classList.toggle('open')"><span class="ft-icon"></span><span class="ft-name dir">cmd/nabustore/</span></div>
+            <ul>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name">main.go</span> <span class="ft-comment">calls driver.Detect + plugin.Open*</span></div></li>
+              <li><div class="ft-row"><span class="ft-icon">📄</span><span class="ft-name new">plugins.go</span> <span class="ft-badge new">new</span> <span class="ft-comment">Blank imports, build-tag controlled</span></div></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ─── Tier 1 ─── -->
+<div class="section" id="tier1">
+  <h2>Tier 1 — Static Registry</h2>
+  <p>Modelled after <code class="inline">database/sql</code> and Docker's volume driver registry. Each subsystem has a named factory registered via <code class="inline">init()</code>. The binary composition is controlled entirely by blank imports in <code class="inline">cmd/nabustore/plugins.go</code>.</p>
+
+  <div class="section" id="registry-api">
+    <h3>Registry API</h3>
+    <p>The registry lives in <code class="inline">plugin/registry.go</code>. It is the only package that imports from all subsystem interfaces simultaneously.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">go</span><span class="code-file">plugin/registry.go</span></div>
+<pre><span class="kw">package</span> plugin
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"sync"</span>
+
+    <span class="str">"github.com/nabustore/nabustore/blob"</span>
+    <span class="str">"github.com/nabustore/nabustore/ec"</span>
+    <span class="str">"github.com/nabustore/nabustore/index"</span>
+    <span class="str">"github.com/nabustore/nabustore/transport"</span>
+)
+
+<span class="kw">type</span> (
+    <span class="ty">BackendFactory</span>   <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>)
+    <span class="ty">TransportFactory</span> <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (transport.<span class="ty">Transport</span>, <span class="ty">error</span>)
+    <span class="ty">ECFactory</span>        <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (ec.<span class="ty">Engine</span>, <span class="ty">error</span>)
+    <span class="ty">IndexFactory</span>     <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (index.<span class="ty">Index</span>, <span class="ty">error</span>)
+)
+
+<span class="cm">// Registration — called from init() in each driver package.</span>
+<span class="kw">func</span> <span class="fn">RegisterBackend</span>(name <span class="ty">string</span>, f <span class="ty">BackendFactory</span>)     { reg(&amp;backends, name, f) }
+<span class="kw">func</span> <span class="fn">RegisterTransport</span>(name <span class="ty">string</span>, f <span class="ty">TransportFactory</span>) { reg(&amp;transports, name, f) }
+<span class="kw">func</span> <span class="fn">RegisterEC</span>(name <span class="ty">string</span>, f <span class="ty">ECFactory</span>)               { reg(&amp;ecEngines, name, f) }
+<span class="kw">func</span> <span class="fn">RegisterIndex</span>(name <span class="ty">string</span>, f <span class="ty">IndexFactory</span>)         { reg(&amp;indexes, name, f) }
+
+<span class="cm">// Lookup — called during node startup via driver.DriverSet.</span>
+<span class="kw">func</span> <span class="fn">OpenBackend</span>(name <span class="ty">string</span>, cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>) {
+    mu.<span class="fn">RLock</span>()
+    f, ok := backends[name]
+    mu.<span class="fn">RUnlock</span>()
+    <span class="kw">if</span> !ok {
+        <span class="kw">return</span> <span class="num">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"plugin: unknown backend %q (registered: %v)"</span>, name, <span class="fn">Keys</span>(&amp;backends))
+    }
+    <span class="kw">return</span> <span class="fn">f</span>(cfg)
+}
+<span class="cm">// OpenTransport, OpenEC, OpenIndex follow the same pattern.</span></pre>
+    </div>
+
+    <p>A vendor calls one of the <code class="inline">Register*</code> functions from a package-level <code class="inline">init()</code>. The binary only needs to blank-import the package:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">go</span><span class="code-file">cmd/nabustore/plugins.go</span></div>
+<pre><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="cm">// ── Always compiled in ──────────────────────────────────</span>
+    _ <span class="str">"github.com/nabustore/nabustore/blob/localfs"</span>
+    _ <span class="str">"github.com/nabustore/nabustore/transport/tcp"</span>
+    _ <span class="str">"github.com/nabustore/nabustore/ec/reedsolomon"</span>
+    _ <span class="str">"github.com/nabustore/nabustore/index/mmap"</span>
+    _ <span class="str">"github.com/nabustore/nabustore/index/cxl"</span>     <span class="cm">// auto-detects at Open time</span>
+
+    <span class="cm">// ── Build-tag gated ─────────────────────────────────────</span>
+    _ <span class="str">"github.com/nabustore/nabustore/blob/spdk"</span>      <span class="cm">// -tags spdk</span>
+    _ <span class="str">"github.com/nabustore/nabustore/transport/dpdk"</span> <span class="cm">// -tags dpdk</span>
+    _ <span class="str">"github.com/nabustore/nabustore/ec/isal"</span>        <span class="cm">// -tags isal</span>
+
+    <span class="cm">// ── Vendor plugins ──────────────────────────────────────</span>
+    <span class="cm">// _ "github.com/kioxia/nabustore-kioxia"   // Kioxia FlashArray</span>
+    <span class="cm">// _ "github.com/hpe/nabustore-alletra"     // HPE Alletra MP</span>
+)</pre>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">&#10003;</span>
+      <div class="callout-body">
+        <strong>Zero changes to core:</strong> adding a vendor backend is a single blank import line. Removing it is deleting that line. The core never contains an <code>if backend == "kioxia"</code> conditional.
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="interfaces">
+    <h3>Subsystem Interfaces</h3>
+    <p>Each subsystem exposes a minimal Go interface. Implementations are completely decoupled from each other. All methods must be safe for concurrent use.</p>
+
+    <h4>blob.BlobBackend (existing)</h4>
+    <table class="iface-table">
+      <thead><tr><th>Method</th><th>Signature</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="method">Put</td><td class="sig">(ctx, id, r io.Reader, meta) error</td><td class="desc">Write-once. Atomic — blob visible or not at all.</td></tr>
+        <tr><td class="method">Get</td><td class="sig">(ctx, id) (io.ReadCloser, BlobMeta, error)</td><td class="desc">Returns stream; caller closes.</td></tr>
+        <tr><td class="method">GetRange</td><td class="sig">(ctx, id, off, n int64) (io.ReadCloser, error)</td><td class="desc">Byte-range read for KV cache partial fetches.</td></tr>
+        <tr><td class="method">Stat</td><td class="sig">(ctx, id) (BlobMeta, error)</td><td class="desc">Size + hash without body transfer.</td></tr>
+        <tr><td class="method">Delete</td><td class="sig">(ctx, id) error</td><td class="desc">Best-effort; not required for KV workloads.</td></tr>
+        <tr><td class="method">List</td><td class="sig">(ctx, prefix, limit) ([]BlobMeta, error)</td><td class="desc">Prefix scan. Used by rebalancer.</td></tr>
+        <tr><td class="method">Capacity</td><td class="sig">(ctx) (used, total int64, err error)</td><td class="desc">(0,0,nil) is valid for NVMe-oF targets.</td></tr>
+        <tr><td class="method">Close</td><td class="sig">() error</td><td class="desc">Called on clean shutdown.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>transport.Transport (new)</h4>
+    <table class="iface-table">
+      <thead><tr><th>Method</th><th>Signature</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="method">Dial</td><td class="sig">(ctx, addr) (Conn, error)</td><td class="desc">Returns a bidirectional message-oriented connection.</td></tr>
+        <tr><td class="method">Listen</td><td class="sig">(addr) (Listener, error)</td><td class="desc">Accept loop for inbound replication/DHT traffic.</td></tr>
+        <tr><td class="method">Name</td><td class="sig">() string</td><td class="desc">Returns "tcp", "dpdk", "rdma", etc.</td></tr>
+        <tr><td class="method">Close</td><td class="sig">() error</td><td class="desc"></td></tr>
+      </tbody>
+    </table>
+
+    <h4>ec.Engine (existing, already abstracted)</h4>
+    <table class="iface-table">
+      <thead><tr><th>Method</th><th>Signature</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="method">Encode</td><td class="sig">(shards [][]byte) error</td><td class="desc">Fills parity shards in-place. Caller allocates.</td></tr>
+        <tr><td class="method">Reconstruct</td><td class="sig">(shards [][]byte) error</td><td class="desc">nil entries = missing. Restores data + parity.</td></tr>
+        <tr><td class="method">ReconstructData</td><td class="sig">(shards [][]byte) error</td><td class="desc">Data only — faster when parity is not needed.</td></tr>
+        <tr><td class="method">Verify</td><td class="sig">(shards [][]byte) (bool, error)</td><td class="desc">Check parity consistency without reconstruct.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>index.Index (interface to be extracted)</h4>
+    <table class="iface-table">
+      <thead><tr><th>Method</th><th>Signature</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="method">Put</td><td class="sig">(id BlobID, e BlobIndexEntry) error</td><td class="desc">Upsert. Auto-resize at 0.72 load factor.</td></tr>
+        <tr><td class="method">Get</td><td class="sig">(id BlobID) (BlobIndexEntry, error)</td><td class="desc">ErrNotFound triggers ring-based fallback.</td></tr>
+        <tr><td class="method">Delete</td><td class="sig">(id BlobID) error</td><td class="desc">Uses backward-shift deletion.</td></tr>
+        <tr><td class="method">Scan</td><td class="sig">(fn func(BlobID, BlobIndexEntry) bool)</td><td class="desc">Full scan for rebalancer. fn returns false to stop.</td></tr>
+        <tr><td class="method">Count</td><td class="sig">() int64</td><td class="desc"></td></tr>
+        <tr><td class="method">LoadFactor</td><td class="sig">() float64</td><td class="desc">Prometheus metric exposure.</td></tr>
+        <tr><td class="method">Close</td><td class="sig">() error</td><td class="desc">Flushes CXL clwb/msync before return.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ─── Tier 2 ─── -->
+<div class="section" id="tier2">
+  <h2>Tier 2 — gRPC Out-of-Process</h2>
+  <p>For vendors who cannot or will not ship Go source. The vendor delivers a compiled binary that listens on a Unix domain socket and speaks the existing <code class="inline">BlobService</code> protobuf contract. A thin adapter in <code class="inline">blob/grpc/grpc_backend.go</code> wraps the gRPC client as a <code class="inline">BlobBackend</code>.</p>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon">&#9888;</span>
+    <div class="callout-body">
+      <strong>Hot path restriction:</strong> Tier 2 is appropriate for bulk-put paths and control-plane operations only. The UDS round-trip overhead (~2–5 µs) is incompatible with sub-microsecond KV cache read requirements. For hot-path operations, vendors must provide a Tier 1 Go package.
+    </div>
+  </div>
+
+  <h3>Discovery Protocol</h3>
+  <p>Modelled after the Kubernetes device plugin pattern. The vendor binary drops a socket file into the well-known plugin directory. The plugin manager watches this directory and automatically wraps each new socket as a registered backend.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">text</span><span class="code-file">Discovery path</span></div>
+<pre>/var/lib/nabustore/plugins/
+├── kioxia.sock       ← vendor binary listens here
+├── hpe-alletra.sock
+└── pure-fb.sock      ← auto-discovered on startup + inotify watch</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">blob/grpc/grpc_backend.go (sketch)</span></div>
+<pre><span class="cm">// GRPCBackend wraps a vendor gRPC process as a BlobBackend.
+// The vendor binary need not be written in Go — it only needs to
+// implement BlobService as defined in proto/nabustore.proto.</span>
+<span class="kw">type</span> <span class="ty">GRPCBackend</span> <span class="kw">struct</span> {
+    conn   *grpc.<span class="ty">ClientConn</span>
+    client pb.<span class="ty">BlobServiceClient</span>
+}
+
+<span class="kw">func</span> <span class="fn">NewGRPCBackend</span>(socketPath <span class="ty">string</span>) (*<span class="ty">GRPCBackend</span>, <span class="ty">error</span>) {
+    conn, err := grpc.<span class="fn">Dial</span>(
+        <span class="str">"unix://"</span>+socketPath,
+        grpc.<span class="fn">WithTransportCredentials</span>(insecure.<span class="fn">NewCredentials</span>()),
+        grpc.<span class="fn">WithBlock</span>(),
+    )
+    <span class="kw">if</span> err != <span class="num">nil</span> {
+        <span class="kw">return</span> <span class="num">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"grpc_backend: dial %s: %w"</span>, socketPath, err)
+    }
+    <span class="kw">return</span> &amp;<span class="ty">GRPCBackend</span>{conn: conn, client: pb.<span class="fn">NewBlobServiceClient</span>(conn)}, <span class="num">nil</span>
+}
+
+<span class="cm">// Put, Get, GetRange, Stat, Delete, List, Capacity, Close
+// all delegate to the gRPC client — proto messages already match
+// BlobBackend semantics 1:1.</span></pre>
+  </div>
+</div>
+
+
+<!-- ─── Tier 3 ─── -->
+<div class="section" id="tier3">
+  <h2>Tier 3 — Auto-Detection</h2>
+  <p>Tier 3 is not a separate plugin tier — it is the startup mechanism that selects among registered Tier 1 plugins based on what hardware is present. The <code class="inline">-backend</code> flag becomes an override, not a requirement.</p>
+
+  <div class="section" id="autodetect">
+    <h3>DriverSet</h3>
+    <p><code class="inline">driver.Detect()</code> probes the system and returns a <code class="inline">DriverSet</code> naming the best available implementation for each subsystem.</p>
+
+    <div class="driver-grid">
+      <div class="driver-card">
+        <h4>CXL Index</h4>
+        <p>Checks <code>/sys/bus/cxl/devices</code>, loaded kernel modules (<code>cxl_mem</code>, <code>cxl_port</code>), and DAX device presence at <code>/dev/dax*</code>.</p>
+        <span class="driver-detection">Selects: index/cxl</span>
+      </div>
+      <div class="driver-card">
+        <h4>SPDK Backend</h4>
+        <p>Verifies socket at <code>--spdk-socket</code> is alive, and that at least one NVMe device is bound to <code>vfio-pci</code> or <code>uio_pci_generic</code>.</p>
+        <span class="driver-detection">Selects: blob/spdk</span>
+      </div>
+      <div class="driver-card">
+        <h4>DPDK Transport</h4>
+        <p>Checks 1GB hugepage allocation via <code>/proc/meminfo</code>, and that a ConnectX DPDK PMD device is present under <code>/dev/vfio/</code>.</p>
+        <span class="driver-detection">Selects: transport/dpdk</span>
+      </div>
+      <div class="driver-card">
+        <h4>ISA-L EC Engine</h4>
+        <p>Runtime CPUID check for AVX-512 (x86) or NEON + SVE (ARM). Falls back to pure-Go <code>klauspost/reedsolomon</code> when unavailable.</p>
+        <span class="driver-detection">Selects: ec/isal</span>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">go</span><span class="code-file">driver/autodetect.go</span></div>
+<pre><span class="kw">package</span> driver
+
+<span class="kw">type</span> <span class="ty">DriverSet</span> <span class="kw">struct</span> {
+    Backend   <span class="ty">string</span>            <span class="cm">// "spdk" | "localfs" | "kioxia" | ...</span>
+    Transport <span class="ty">string</span>            <span class="cm">// "dpdk" | "tcp" | "rdma"</span>
+    EC        <span class="ty">string</span>            <span class="cm">// "isal" | "reedsolomon"</span>
+    Index     <span class="ty">string</span>            <span class="cm">// "cxl" | "mmap"</span>
+    Config    <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span> <span class="cm">// driver-specific key/value config</span>
+}
+
+<span class="kw">func</span> <span class="fn">Detect</span>(hints *<span class="ty">Config</span>) <span class="ty">DriverSet</span> {
+    ds := <span class="ty">DriverSet</span>{Config: <span class="kw">make</span>(<span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>)}
+
+    <span class="cm">// ── Index: CXL DIMM via kernel DAX driver ────────────────</span>
+    <span class="kw">if</span> info := cxlinfo.<span class="fn">Detect</span>(); info.Available {
+        ds.Index = <span class="str">"cxl"</span>
+        ds.Config[<span class="str">"cxl_numa"</span>] = strconv.<span class="fn">Itoa</span>(info.<span class="fn">PreferredNUMA</span>())
+        ds.Config[<span class="str">"cxl_dax"</span>]  = info.DAXDevice   <span class="cm">// e.g. /dev/dax0.0</span>
+    } <span class="kw">else</span> {
+        ds.Index = <span class="str">"mmap"</span>
+        ds.Config[<span class="str">"mmap_path"</span>] = hints.IndexPath
+    }
+
+    <span class="cm">// ── Backend: SPDK if socket alive + devices bound ────────</span>
+    <span class="kw">if</span> hints.SPDKSocket != <span class="str">""</span> &amp;&amp; spdk.<span class="fn">SocketAlive</span>(hints.SPDKSocket) &amp;&amp; spdk.<span class="fn">HasBoundDevices</span>() {
+        ds.Backend = <span class="str">"spdk"</span>
+        ds.Config[<span class="str">"socket"</span>] = hints.SPDKSocket
+        ds.Config[<span class="str">"bdev"</span>]   = hints.SPDKBdev
+    } <span class="kw">else</span> {
+        ds.Backend = <span class="str">"localfs"</span>
+        ds.Config[<span class="str">"data_dir"</span>] = hints.DataDir
+    }
+
+    <span class="cm">// ── Transport: DPDK if hugepages + PMD device present ────</span>
+    <span class="kw">if</span> dpdk.<span class="fn">HugepagesAvailable</span>() &amp;&amp; dpdk.<span class="fn">HasPMDDevice</span>() {
+        ds.Transport = <span class="str">"dpdk"</span>
+    } <span class="kw">else</span> {
+        ds.Transport = <span class="str">"tcp"</span>
+    }
+
+    <span class="cm">// ── EC: ISA-L via runtime CPUID ──────────────────────────</span>
+    <span class="kw">if</span> isal.<span class="fn">Available</span>() {
+        ds.EC = <span class="str">"isal"</span>
+    } <span class="kw">else</span> {
+        ds.EC = <span class="str">"reedsolomon"</span>
+    }
+
+    <span class="cm">// Explicit flag overrides take final precedence</span>
+    <span class="kw">if</span> hints.BackendOverride != <span class="str">""</span> { ds.Backend = hints.BackendOverride }
+    <span class="kw">if</span> hints.IndexOverride != <span class="str">""</span>   { ds.Index   = hints.IndexOverride }
+
+    <span class="kw">return</span> ds
+}</pre>
+    </div>
+
+    <p>In <code class="inline">main.go</code> the startup sequence becomes a clean three-step pipeline:</p>
+
+    <div class="flow-row">
+      <div class="flow-box">flag.Parse()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box purple">driver.Detect(hints)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box teal">plugin.Open*(ds.*)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">server.New()</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── Blob Backends ─── -->
+<div class="section" id="blob-backends">
+  <h2>Blob Backends</h2>
+  <p>The three built-in storage backends and their registration patterns. Each lives in its own sub-package and registers itself without any dependency on core.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">blob/localfs/register.go — always compiled</span></div>
+<pre><span class="kw">package</span> localfs
+
+<span class="kw">import</span> <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+
+<span class="kw">func</span> init() {
+    plugin.<span class="fn">RegisterBackend</span>(<span class="str">"localfs"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>) {
+        <span class="kw">return</span> <span class="fn">NewLocalFSBackend</span>(cfg[<span class="str">"data_dir"</span>])
+    })
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">blob/spdk/register.go — build tag: spdk</span></div>
+<pre><span class="cm">//go:build spdk</span>
+
+<span class="kw">package</span> spdk
+
+<span class="kw">import</span> <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+
+<span class="kw">func</span> init() {
+    plugin.<span class="fn">RegisterBackend</span>(<span class="str">"spdk"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>) {
+        <span class="kw">return</span> <span class="fn">NewSPDKBackend</span>(cfg[<span class="str">"socket"</span>], cfg[<span class="str">"bdev"</span>], cfg[<span class="str">"core_mask"</span>])
+    })
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">blob/grpc/register.go — Tier 2 out-of-process</span></div>
+<pre><span class="kw">package</span> grpcbackend
+
+<span class="kw">import</span> <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+
+<span class="kw">func</span> init() {
+    <span class="cm">// The gRPC backend name is the socket path prefix.
+    // plugin.OpenBackend("grpc:kioxia", cfg) → dials unix:///var/lib/nabustore/plugins/kioxia.sock</span>
+    plugin.<span class="fn">RegisterBackend</span>(<span class="str">"grpc"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>) {
+        <span class="kw">return</span> <span class="fn">NewGRPCBackend</span>(cfg[<span class="str">"socket_path"</span>])
+    })
+}</pre>
+  </div>
+</div>
+
+
+<!-- ─── Transport ─── -->
+<div class="section" id="transport">
+  <h2>Transport</h2>
+  <p>The transport subsystem handles intra-cluster replication traffic and DHT ring messages. It is separated from the blob backend because DPDK NICs and SPDK NVMe devices use fundamentally different programming models that must not be mixed.</p>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon">&#9888;</span>
+    <div class="callout-body">
+      <strong>DPDK / IB RDMA incompatibility:</strong> A ConnectX-7 NIC in native InfiniBand mode is owned by <code>rdma-core/libibverbs</code> and cannot simultaneously be driven by DPDK's <code>mlx5</code> PMD. SPDK owns IB NICs (NVMe-oF RDMA path); DPDK owns ConnectX Ethernet NICs (replication/RoCE path). These must never share a physical NIC.
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">transport/dpdk/register.go — build tag: dpdk</span></div>
+<pre><span class="cm">//go:build dpdk</span>
+
+<span class="kw">package</span> dpdk
+
+<span class="kw">import</span> <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+
+<span class="kw">func</span> init() {
+    plugin.<span class="fn">RegisterTransport</span>(<span class="str">"dpdk"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (transport.<span class="ty">Transport</span>, <span class="ty">error</span>) {
+        <span class="kw">return</span> <span class="fn">NewDPDKTransport</span>(cfg[<span class="str">"pci_addr"</span>], cfg[<span class="str">"core_mask"</span>], cfg[<span class="str">"mem_size"</span>])
+    })
+}</pre>
+  </div>
+</div>
+
+
+<!-- ─── EC Engines ─── -->
+<div class="section" id="ec-engines">
+  <h2>EC Engines</h2>
+  <p>The EC engine interface is already implicit in <code class="inline">ec/ec.go</code>. The migration moves the <code>klauspost/reedsolomon</code> implementation into <code class="inline">ec/reedsolomon/</code> and adds an ISA-L CGO backend for AVX-512 / NEON production paths.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">ec/isal/register.go — build tag: isal</span></div>
+<pre><span class="cm">//go:build isal
+// +build isal
+//
+// CGO linkage: -lisal  (Intel Intelligent Storage Acceleration Library)
+// ISA-L must be installed: dnf install isa-l-devel / apt install libisal-dev</span>
+
+<span class="kw">package</span> isal
+
+<span class="kw">import</span> <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+
+<span class="kw">func</span> init() {
+    plugin.<span class="fn">RegisterEC</span>(<span class="str">"isal"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (ec.<span class="ty">Engine</span>, <span class="ty">error</span>) {
+        data, _ := strconv.<span class="fn">Atoi</span>(cfg[<span class="str">"data_shards"</span>])
+        parity, _ := strconv.<span class="fn">Atoi</span>(cfg[<span class="str">"parity_shards"</span>])
+        <span class="kw">return</span> <span class="fn">NewISALEngine</span>(data, parity)  <span class="cm">// CGO call into gf_vect_mul / ec_encode_data</span>
+    })
+}</pre>
+  </div>
+
+  <p>The <code class="inline">isal.Available()</code> function used by <code class="inline">driver/autodetect.go</code> performs a runtime CPUID check — it is always compiled in even without the <code class="inline">isal</code> build tag, so the autodetector can query it on any binary.</p>
+</div>
+
+
+<!-- ─── Index Backends ─── -->
+<div class="section" id="index-backends">
+  <h2>Index Backends</h2>
+
+  <div class="callout callout-prereq">
+    <span class="callout-icon">&#9432;</span>
+    <div class="callout-body">
+      <strong>Prerequisite:</strong> <code>index/index.go</code> currently exports a concrete Robin Hood hashmap rather than an interface. Extracting <code>index.Index</code> is a hard prerequisite for the mmap/CXL split. This is the first task in the migration path below.
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">index/cxl/cxl.go — DAX-backed, zero vendor software required</span></div>
+<pre><span class="cm">// CXLIndex is a Robin Hood hash map backed by a Linux DAX device.
+// No vendor software required — uses the standard kernel cxl_mem driver
+// (in from 5.12, production-stable from 6.5).
+//
+// Detection path:
+//   1. /sys/bus/cxl/devices/*  — enumerate CXL DIMMs
+//   2. /dev/dax*               — find corresponding DAX character device
+//   3. mmap(O_RDWR|MAP_SHARED) — map the DAX range directly
+//   4. clflushopt/clwb         — persistence without msync() overhead
+//
+// The layout on the DAX device is identical to the mmap/file backend
+// so a node can be rebooted without re-indexing.</span>
+
+<span class="kw">type</span> <span class="ty">CXLIndex</span> <span class="kw">struct</span> {
+    base    *<span class="ty">mmapIndex</span>  <span class="cm">// shared Robin Hood logic</span>
+    dax     *<span class="ty">os.File</span>
+    numaNode <span class="ty">int</span>
+}
+
+<span class="kw">func</span> <span class="fn">New</span>(daxPath <span class="ty">string</span>, numaNode <span class="ty">int</span>) (*<span class="ty">CXLIndex</span>, <span class="ty">error</span>) {
+    f, err := os.<span class="fn">OpenFile</span>(daxPath, os.<span class="ty">O_RDWR</span>, <span class="num">0600</span>)
+    <span class="kw">if</span> err != <span class="num">nil</span> {
+        <span class="kw">return</span> <span class="num">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"cxl_index: open %s: %w"</span>, daxPath, err)
+    }
+    <span class="cm">// ... mmap + validate magic header ...</span>
+}</pre>
+  </div>
+</div>
+
+
+<!-- ─── Writing a Plugin ─── -->
+<div class="section" id="writing-plugin">
+  <h2>Writing a Vendor Plugin</h2>
+  <p>A vendor supplying, for example, a Kioxia XD7P FlashArray backend follows these steps to produce a Tier 1 plugin with no changes to nabustore core.</p>
+
+  <div class="vendor-options">
+    <div class="vendor-option">
+      <div class="vendor-option-head">Option A — Tier 1: Go package</div>
+      <div class="vendor-option-sub">Recommended. Zero overhead. Compiled into the nabustore binary.</div>
+      <div class="vendor-pro">✓ Sub-microsecond hot path<br>✓ No IPC overhead<br>✓ Full interface coverage</div>
+    </div>
+    <div class="vendor-option">
+      <div class="vendor-option-head">Option B — Tier 2: gRPC binary</div>
+      <div class="vendor-option-sub">No Go required. Ships as a compiled binary. Suitable for control path.</div>
+      <div class="vendor-con">△ ~2–5µs UDS round-trip<br>△ Control path / bulk-put only<br>△ BlobService proto only</div>
+    </div>
+  </div>
+
+  <h3>Tier 1 Step-by-Step</h3>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Create your Go module</h4>
+        <p>Module path <code class="inline">github.com/kioxia/nabustore-kioxia</code>. Add <code class="inline">github.com/nabustore/nabustore</code> as a dependency — only interface packages, no core.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Implement the interface</h4>
+        <p>Create a struct that satisfies <code class="inline">blob.BlobBackend</code>. All methods must be goroutine-safe. Return <code class="inline">blob.ErrBlobExists</code>, <code class="inline">blob.ErrBlobNotFound</code>, etc. for correct error signalling.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Register in init()</h4>
+        <p>Call <code class="inline">plugin.RegisterBackend("kioxia-xd7p", factory)</code> in a package-level <code class="inline">init()</code>. The factory receives a <code class="inline">map[string]string</code> config from the DriverSet.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Publish the package</h4>
+        <p>Tag a release. The operator adds one blank import to <code class="inline">cmd/nabustore/plugins.go</code>: <code class="inline">_ "github.com/kioxia/nabustore-kioxia"</code>. No other changes required.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">go</span><span class="code-file">github.com/kioxia/nabustore-kioxia — register.go</span></div>
+<pre><span class="kw">package</span> kioxia
+
+<span class="kw">import</span> (
+    <span class="str">"github.com/nabustore/nabustore/blob"</span>
+    <span class="str">"github.com/nabustore/nabustore/plugin"</span>
+)
+
+<span class="kw">func</span> init() {
+    plugin.<span class="fn">RegisterBackend</span>(<span class="str">"kioxia-xd7p"</span>, <span class="kw">func</span>(cfg <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>) (blob.<span class="ty">BlobBackend</span>, <span class="ty">error</span>) {
+        <span class="kw">return</span> <span class="fn">NewXD7PBackend</span>(
+            cfg[<span class="str">"endpoint"</span>],   <span class="cm">// e.g. "192.168.1.10:4420"</span>
+            cfg[<span class="str">"nqn"</span>],        <span class="cm">// NVMe Qualified Name for the subsystem</span>
+            cfg[<span class="str">"ns_id"</span>],      <span class="cm">// Namespace ID</span>
+        )
+    })
+}</pre>
+  </div>
+</div>
+
+
+<!-- ─── Build Composition ─── -->
+<div class="section" id="build-composition">
+  <h2>Build Composition</h2>
+  <p>Build tags remain the mechanism for gating hardware-specific CGO dependencies. The difference is that tags now only affect <em>which packages get blank-imported in plugins.go</em> — they never appear in core logic.</p>
+
+  <table class="compat-table">
+    <thead>
+      <tr><th>Target</th><th>Build command</th><th>Included backends</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Development / CI</td><td><code class="inline">go build ./cmd/nabustore</code></td><td>localfs, tcp, reedsolomon, mmap</td></tr>
+      <tr><td>Production NVMe</td><td><code class="inline">go build -tags spdk ./cmd/nabustore</code></td><td>+ spdk</td></tr>
+      <tr><td>Production full</td><td><code class="inline">go build -tags "spdk dpdk isal" ./cmd/nabustore</code></td><td>+ spdk, dpdk, isal</td></tr>
+      <tr><td>Vendor (Kioxia)</td><td><code class="inline">go build -tags kioxia ./cmd/nabustore</code></td><td>+ kioxia-xd7p (Tier 1)</td></tr>
+      <tr><td>ARM (Grace)</td><td><code class="inline">GOARCH=arm64 go build -tags isal ./cmd/nabustore</code></td><td>isal → NEON path via ISA-L ARM</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ─── Compat Matrix ─── -->
+<div class="section" id="compat">
+  <h2>Compatibility Matrix</h2>
+  <p>Which tiers are appropriate for each subsystem and workload type.</p>
+
+  <table class="compat-table">
+    <thead>
+      <tr><th>Subsystem</th><th>Tier 1 (in-process)</th><th>Tier 2 (gRPC)</th><th>Hot path safe</th><th>CXL/auto-detect</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Blob backend</strong></td>
+        <td class="compat-y">✓ Required for reads</td>
+        <td class="compat-p">△ Bulk-put only</td>
+        <td class="compat-y">Tier 1 only</td>
+        <td class="compat-n">N/A</td>
+      </tr>
+      <tr>
+        <td><strong>Transport</strong></td>
+        <td class="compat-y">✓</td>
+        <td class="compat-n">✗ Not supported</td>
+        <td class="compat-y">✓</td>
+        <td class="compat-p">△ hugepages probe</td>
+      </tr>
+      <tr>
+        <td><strong>EC engine</strong></td>
+        <td class="compat-y">✓</td>
+        <td class="compat-n">✗ Not supported</td>
+        <td class="compat-y">✓</td>
+        <td class="compat-y">✓ CPUID at startup</td>
+      </tr>
+      <tr>
+        <td><strong>Index</strong></td>
+        <td class="compat-y">✓</td>
+        <td class="compat-n">✗ Not supported</td>
+        <td class="compat-y">✓</td>
+        <td class="compat-y">✓ DAX probe</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ─── Migration Path ─── -->
+<div class="section" id="migration">
+  <h2>Migration Path</h2>
+  <p>The migration is fully additive — no existing interface is changed. Each step can be merged independently and is safe to deploy without completing the full migration.</p>
+
+  <div class="section" id="prereqs">
+    <h3>Prerequisites</h3>
+    <div class="adr-block">
+      <div class="adr-kv">
+        <span class="adr-k">Blocker</span>
+        <span class="adr-v">Extract <code class="inline">index.Index</code> interface from <code class="inline">index/index.go</code>. Currently exports a concrete Robin Hood hashmap. All callers use the concrete type directly — this must become an interface before the mmap/CXL split can proceed cleanly.</span>
+        <span class="adr-k">Effort</span>
+        <span class="adr-v">~2 hours. Existing contract tests in <code class="inline">blob/local_test.go</code> already exercise the full interface surface — they provide the test harness for the new interface.</span>
+        <span class="adr-k">Risk</span>
+        <span class="adr-v">Low. Pure refactor — no behaviour change, no new dependencies.</span>
+      </div>
+    </div>
+
+    <h3>Ordered Steps</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Extract index.Index interface</h4>
+          <p>Define interface in <code class="inline">index/index.go</code>, move concrete impl to <code class="inline">index/mmap/mmap.go</code>. Update all call sites. <strong>Required before any further split.</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Create plugin/registry.go</h4>
+          <p>New package. No dependencies on existing code except interfaces. Does not break anything — nothing imports it yet.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Move localfs and spdk into sub-packages</h4>
+          <p>Add <code class="inline">register.go</code> with <code class="inline">init()</code> to each. Update <code class="inline">cmd/nabustore/plugins.go</code> with blank imports. Remove the <code class="inline">if backend == "spdk"</code> branches from <code class="inline">server/server.go</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Create transport package</h4>
+          <p>Define <code class="inline">Transport</code> interface. Move existing TCP replication logic to <code class="inline">transport/tcp/</code>. Move DPDK build-tag code to <code class="inline">transport/dpdk/</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Create driver/autodetect.go</h4>
+          <p>Wraps existing <code class="inline">cxl/util.go</code> detection. Adds SPDK socket probe and DPDK hugepage check. Returns <code class="inline">DriverSet</code>. Simplify <code class="inline">main.go</code> to the three-step pipeline.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Add CXL index plugin</h4>
+          <p>Implement <code class="inline">index/cxl/</code> backed by kernel DAX (<code class="inline">/dev/dax*</code>). Register as <code class="inline">"cxl"</code>. Autodetector selects it when a DAX device is present.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h4>Add ISA-L EC engine</h4>
+          <p>Implement <code class="inline">ec/isal/</code> with CGO bindings to ISA-L. Register as <code class="inline">"isal"</code>. <code class="inline">isal.Available()</code> compiled into all binaries for the autodetector.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h4>Add Tier 2 gRPC backend</h4>
+          <p>Implement <code class="inline">blob/grpc/grpc_backend.go</code>. Add plugin manager with <code class="inline">inotify</code> watch on <code class="inline">/var/lib/nabustore/plugins/</code>. Register any discovered <code class="inline">.sock</code> files as <code class="inline">"grpc:&lt;name&gt;"</code> backends.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

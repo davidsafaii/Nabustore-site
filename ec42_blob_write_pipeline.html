@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;padding:16px;background:#fff;color:#1a1a1a}
+@media(prefers-color-scheme:dark){body{background:#1a1a1a;color:#e2e2e2}}
+.fl{opacity:0;transition:opacity .35s}.fl.on{opacity:1}
+.hl{opacity:0;transition:opacity .3s;pointer-events:none}.hl.on{opacity:.3}
+svg text{font-family:sans-serif}
+.ctrl{display:flex;align-items:center;gap:8px;margin:8px 0 0;flex-wrap:wrap}
+button{padding:5px 14px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;color:#1a1a1a;cursor:pointer;font-size:13px}
+@media(prefers-color-scheme:dark){button{border-color:#444;background:#2a2a2a;color:#e2e2e2}}
+button:disabled{opacity:.4;cursor:default}
+.card{margin:8px 0 0;padding:10px 14px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;min-height:96px}
+@media(prefers-color-scheme:dark){.card{background:#222;border-color:#333}}
+#ct{font-size:11px;font-weight:500;color:#888;margin-bottom:3px}
+#ci{font-size:13px;font-weight:500;margin-bottom:5px}
+#cc{font-family:monospace;font-size:12px;white-space:pre;line-height:1.55}
+#sn{font-size:12px;color:#888}
+.legend{display:flex;gap:14px;margin:8px 0 0;font-size:12px;color:#666;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:4px}
+.ls{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+<svg width="100%" viewBox="0 0 680 312" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.th{font-size:14px;font-weight:500}.ts{font-size:12px;opacity:.8}
+.c-blue>rect{fill:#E6F1FB;stroke:#185FA5;stroke-width:.5}
+.c-blue .th{fill:#0C447C}.c-blue .ts{fill:#185FA5}
+.c-teal>rect{fill:#E1F5EE;stroke:#0F6E56;stroke-width:.5}
+.c-teal .th{fill:#085041}.c-teal .ts{fill:#0F6E56}
+.c-amber>rect{fill:#FAEEDA;stroke:#854F0B;stroke-width:.5}
+.c-amber .th{fill:#633806}.c-amber .ts{fill:#854F0B}
+.c-coral>rect{fill:#FAECE7;stroke:#993C1D;stroke-width:.5}
+.c-coral .th{fill:#712B13}.c-coral .ts{fill:#993C1D}
+@media(prefers-color-scheme:dark){
+.c-blue>rect{fill:#0C447C;stroke:#85B7EB}
+.c-blue .th{fill:#B5D4F4}.c-blue .ts{fill:#85B7EB}
+.c-teal>rect{fill:#085041;stroke:#5DCAA5}
+.c-teal .th{fill:#9FE1CB}.c-teal .ts{fill:#5DCAA5}
+.c-amber>rect{fill:#633806;stroke:#EF9F27}
+.c-amber .th{fill:#FAC775}.c-amber .ts{fill:#EF9F27}
+.c-coral>rect{fill:#712B13;stroke:#F0997B}
+.c-coral .th{fill:#F5C4B3}.c-coral .ts{fill:#F0997B}
+.th,.ts{fill:#e2e2e2}
+}
+</style>
+<marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- blob input -->
+<g class="c-blue">
+<rect x="190" y="14" width="300" height="40" rx="8"/>
+<text class="th" x="340" y="27" text-anchor="middle" dominant-baseline="central">blob  0xA3F2…</text>
+<text class="ts" x="340" y="43" text-anchor="middle" dominant-baseline="central">4 MB  ·  nixl_put</text>
+</g>
+<rect id="hl-blob" class="hl" x="190" y="14" width="300" height="40" rx="8" fill="#185FA5"/>
+
+<!-- split arrows blob → shards -->
+<path id="p-bd0" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M340,54 L340,65 L90,65 L90,76" marker-end="url(#a)"/>
+<path id="p-bd1" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M340,54 L340,65 L234,65 L234,76" marker-end="url(#a)"/>
+<path id="p-bd2" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M340,54 L340,65 L378,65 L378,76" marker-end="url(#a)"/>
+<path id="p-bd3" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M340,54 L340,65 L522,65 L522,76" marker-end="url(#a)"/>
+
+<!-- data shards D0–D3 -->
+<g class="c-teal"><rect x="30"  y="76" width="120" height="40" rx="8"/>
+<text class="th" x="90"  y="89" text-anchor="middle" dominant-baseline="central">D0</text>
+<text class="ts" x="90"  y="105" text-anchor="middle" dominant-baseline="central">1 MB · data</text></g>
+<rect id="hl-d0" class="hl" x="30"  y="76" width="120" height="40" rx="8" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="174" y="76" width="120" height="40" rx="8"/>
+<text class="th" x="234" y="89" text-anchor="middle" dominant-baseline="central">D1</text>
+<text class="ts" x="234" y="105" text-anchor="middle" dominant-baseline="central">1 MB · data</text></g>
+<rect id="hl-d1" class="hl" x="174" y="76" width="120" height="40" rx="8" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="318" y="76" width="120" height="40" rx="8"/>
+<text class="th" x="378" y="89" text-anchor="middle" dominant-baseline="central">D2</text>
+<text class="ts" x="378" y="105" text-anchor="middle" dominant-baseline="central">1 MB · data</text></g>
+<rect id="hl-d2" class="hl" x="318" y="76" width="120" height="40" rx="8" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="462" y="76" width="120" height="40" rx="8"/>
+<text class="th" x="522" y="89" text-anchor="middle" dominant-baseline="central">D3</text>
+<text class="ts" x="522" y="105" text-anchor="middle" dominant-baseline="central">1 MB · data</text></g>
+<rect id="hl-d3" class="hl" x="462" y="76" width="120" height="40" rx="8" fill="#0F6E56"/>
+
+<!-- shards → ISA-L arrows -->
+<line id="p-di0" class="fl" x1="90"  y1="116" x2="90"  y2="138" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-di1" class="fl" x1="234" y1="116" x2="234" y2="138" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-di2" class="fl" x1="378" y1="116" x2="378" y2="138" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-di3" class="fl" x1="522" y1="116" x2="522" y2="138" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- ISA-L encoder -->
+<g class="c-amber">
+<rect x="20" y="138" width="620" height="40" rx="8"/>
+<text class="th" x="330" y="151" text-anchor="middle" dominant-baseline="central">ISA-L EC 4+2 encoder</text>
+<text class="ts" x="330" y="167" text-anchor="middle" dominant-baseline="central">GF(2⁸) Reed-Solomon  ·  Cauchy matrix  ·  AVX-512  ·  ~2 µs / 4 MB stripe</text>
+</g>
+<rect id="hl-isal" class="hl" x="20" y="138" width="620" height="40" rx="8" fill="#854F0B"/>
+
+<!-- ISA-L → output shards arrows -->
+<path id="p-is0" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M330,178 L330,187 L65,187 L65,196" marker-end="url(#a)"/>
+<path id="p-is1" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M330,178 L330,187 L169,187 L169,196" marker-end="url(#a)"/>
+<path id="p-is2" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M330,178 L330,187 L273,187 L273,196" marker-end="url(#a)"/>
+<path id="p-is3" class="fl" fill="none" stroke="#1D9E75" stroke-width="1.5" d="M330,178 L330,187 L377,187 L377,196" marker-end="url(#a)"/>
+<path id="p-is4" class="fl" fill="none" stroke="#D85A30" stroke-width="1.5" d="M330,178 L330,187 L481,187 L481,196" marker-end="url(#a)"/>
+<path id="p-is5" class="fl" fill="none" stroke="#D85A30" stroke-width="1.5" d="M330,178 L330,187 L585,187 L585,196" marker-end="url(#a)"/>
+
+<!-- output shards + node labels -->
+<g class="c-teal"><rect x="22"  y="196" width="86" height="40" rx="6"/>
+<text class="th" x="65"  y="209" text-anchor="middle" dominant-baseline="central">D0</text>
+<text class="ts" x="65"  y="225" text-anchor="middle" dominant-baseline="central">→ node 0</text></g>
+<rect id="hl-s0" class="hl" x="22"  y="196" width="86" height="40" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="126" y="196" width="86" height="40" rx="6"/>
+<text class="th" x="169" y="209" text-anchor="middle" dominant-baseline="central">D1</text>
+<text class="ts" x="169" y="225" text-anchor="middle" dominant-baseline="central">→ node 1</text></g>
+<rect id="hl-s1" class="hl" x="126" y="196" width="86" height="40" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="230" y="196" width="86" height="40" rx="6"/>
+<text class="th" x="273" y="209" text-anchor="middle" dominant-baseline="central">D2</text>
+<text class="ts" x="273" y="225" text-anchor="middle" dominant-baseline="central">→ node 2</text></g>
+<rect id="hl-s2" class="hl" x="230" y="196" width="86" height="40" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="334" y="196" width="86" height="40" rx="6"/>
+<text class="th" x="377" y="209" text-anchor="middle" dominant-baseline="central">D3</text>
+<text class="ts" x="377" y="225" text-anchor="middle" dominant-baseline="central">→ node 3</text></g>
+<rect id="hl-s3" class="hl" x="334" y="196" width="86" height="40" rx="6" fill="#0F6E56"/>
+
+<g class="c-coral"><rect x="438" y="196" width="86" height="40" rx="6"/>
+<text class="th" x="481" y="209" text-anchor="middle" dominant-baseline="central">P0</text>
+<text class="ts" x="481" y="225" text-anchor="middle" dominant-baseline="central">→ node 4</text></g>
+<rect id="hl-s4" class="hl" x="438" y="196" width="86" height="40" rx="6" fill="#993C1D"/>
+
+<g class="c-coral"><rect x="542" y="196" width="86" height="40" rx="6"/>
+<text class="th" x="585" y="209" text-anchor="middle" dominant-baseline="central">P1</text>
+<text class="ts" x="585" y="225" text-anchor="middle" dominant-baseline="central">→ node 5</text></g>
+<rect id="hl-s5" class="hl" x="542" y="196" width="86" height="40" rx="6" fill="#993C1D"/>
+
+<!-- shard → node arrows -->
+<line id="p-s0n0" class="fl" x1="65"  y1="236" x2="65"  y2="252" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-s1n1" class="fl" x1="169" y1="236" x2="169" y2="252" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-s2n2" class="fl" x1="273" y1="236" x2="273" y2="252" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-s3n3" class="fl" x1="377" y1="236" x2="377" y2="252" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-s4n4" class="fl" x1="481" y1="236" x2="481" y2="252" stroke="#D85A30" stroke-width="1.5" marker-end="url(#a)"/>
+<line id="p-s5n5" class="fl" x1="585" y1="236" x2="585" y2="252" stroke="#D85A30" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- storage nodes -->
+<g class="c-teal"><rect x="22"  y="252" width="86" height="46" rx="6"/>
+<text class="th" x="65"  y="268" text-anchor="middle" dominant-baseline="central">node 0</text>
+<text class="ts" x="65"  y="284" text-anchor="middle" dominant-baseline="central">stores D0</text></g>
+<rect id="hl-n0" class="hl" x="22"  y="252" width="86" height="46" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="126" y="252" width="86" height="46" rx="6"/>
+<text class="th" x="169" y="268" text-anchor="middle" dominant-baseline="central">node 1</text>
+<text class="ts" x="169" y="284" text-anchor="middle" dominant-baseline="central">stores D1</text></g>
+<rect id="hl-n1" class="hl" x="126" y="252" width="86" height="46" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="230" y="252" width="86" height="46" rx="6"/>
+<text class="th" x="273" y="268" text-anchor="middle" dominant-baseline="central">node 2</text>
+<text class="ts" x="273" y="284" text-anchor="middle" dominant-baseline="central">stores D2</text></g>
+<rect id="hl-n2" class="hl" x="230" y="252" width="86" height="46" rx="6" fill="#0F6E56"/>
+
+<g class="c-teal"><rect x="334" y="252" width="86" height="46" rx="6"/>
+<text class="th" x="377" y="268" text-anchor="middle" dominant-baseline="central">node 3</text>
+<text class="ts" x="377" y="284" text-anchor="middle" dominant-baseline="central">stores D3</text></g>
+<rect id="hl-n3" class="hl" x="334" y="252" width="86" height="46" rx="6" fill="#0F6E56"/>
+
+<g class="c-coral"><rect x="438" y="252" width="86" height="46" rx="6"/>
+<text class="th" x="481" y="268" text-anchor="middle" dominant-baseline="central">node 4</text>
+<text class="ts" x="481" y="284" text-anchor="middle" dominant-baseline="central">stores P0</text></g>
+<rect id="hl-n4" class="hl" x="438" y="252" width="86" height="46" rx="6" fill="#993C1D"/>
+
+<g class="c-coral"><rect x="542" y="252" width="86" height="46" rx="6"/>
+<text class="th" x="585" y="268" text-anchor="middle" dominant-baseline="central">node 5</text>
+<text class="ts" x="585" y="284" text-anchor="middle" dominant-baseline="central">stores P1</text></g>
+<rect id="hl-n5" class="hl" x="542" y="252" width="86" height="46" rx="6" fill="#993C1D"/>
+</svg>
+
+<div class="legend">
+<span class="li"><span class="ls" style="background:#1D9E75"></span>data shards (D0–D3)</span>
+<span class="li"><span class="ls" style="background:#D85A30"></span>parity shards (P0–P1)</span>
+<span class="li"><span class="ls" style="background:#BA7517"></span>ISA-L encoder</span>
+</div>
+
+<div class="ctrl">
+<button id="bp" onclick="go(-1)">← prev</button>
+<div id="dots" style="display:flex;gap:5px"></div>
+<button id="bn" onclick="go(1)">next →</button>
+<span id="sn"></span>
+</div>
+<div class="card">
+<div id="ct"></div>
+<div id="ci"></div>
+<div id="cc"></div>
+</div>
+
+<script>
+const ALL_D=['p-bd0','p-bd1','p-bd2','p-bd3'];
+const ALL_DI=['p-di0','p-di1','p-di2','p-di3'];
+const ALL_IS=['p-is0','p-is1','p-is2','p-is3','p-is4','p-is5'];
+const ALL_SN_D=['p-s0n0','p-s1n1','p-s2n2','p-s3n3'];
+const ALL_SN_P=['p-s4n4','p-s5n5'];
+const S=[
+{t:'NIXL blob_put received at primary storage node',
+ g:'GPU node → storage node 1  ·  NIXL plugin  ·  nixl/plugin/plugin.go',
+ c:'nixl_put(blob_id="0xA3F2…", src_mem=hbm_ptr, size=4194304)\n// 4 MB blob received over InfiniBand NDR from GPU HBM\n// DHT: ring.Lookup(hash(blob_id)) → this node is primary',
+ p:[],h:['hl-blob']},
+{t:'Blob split into 4 equal data shards D0–D3',
+ g:'storage node 1  ·  EC engine  ·  ec/ec.go',
+ c:'shards := ec.Split(blob, params.Data)  // params.Data = 4\n// D0=blob[0..1MB)  D1=blob[1..2MB)\n// D2=blob[2..3MB)  D3=blob[3..4MB)\n// each 1 MB shard allocated in DPDK huge-page DMA pool',
+ p:[...ALL_D],h:['hl-d0','hl-d1','hl-d2','hl-d3']},
+{t:'ISA-L AVX-512 GF(2⁸) RS encodes parity shards P0, P1',
+ g:'storage node 1  ·  ISA-L  ·  GF(2⁸) Cauchy matrix  ·  EC 4+2',
+ c:'enc := isa_l.NewEncoder(4, 2)          // Cauchy encoding matrix\nenc.Encode(shards[:4], shards[4:])     // → P0, P1 computed\n// AVX-512: 64 bytes / instruction over GF(2⁸)\n// 4 MB blob → 6 × 1 MB shards in ~2 µs on EPYC 9654',
+ p:[...ALL_D,...ALL_DI],h:['hl-isal']},
+{t:'DHT ring maps each shard to a distinct node',
+ g:'storage node 1  ·  DHT ring  ·  ring/ring.go',
+ c:'for i := range shards {               // i = 0..5\n    key    := ring.DeriveKey(blobID, stripeIdx, i)\n    dest[i] = ring.Lookup(key)         // 150 vnodes / node\n}\n// all 6 shards guaranteed on 6 distinct physical nodes',
+ p:[...ALL_D,...ALL_DI,...ALL_IS],h:['hl-s0','hl-s1','hl-s2','hl-s3','hl-s4','hl-s5']},
+{t:'DPDK dispatches data shards D0–D3 over 200 GbE',
+ g:'storage node 1  ·  DPDK mlx5 PMD  ·  ConnectX-7 Ethernet',
+ c:'for i := 0; i < 4; i++ {              // data shards\n    mbuf := rte_pktmbuf_alloc(shard_pool)\n    rte_pktmbuf_attach_extbuf(mbuf, shards[i].DMABuf, 1<<20, &si)\n    rte_eth_tx_burst(eth_port, txq, &mbuf, 1)  // zero-copy\n}  // ConnectX-7 in Ethernet/RoCE mode — not IB verbs',
+ p:[...ALL_D,...ALL_DI,...ALL_IS,...ALL_SN_D],h:['hl-s0','hl-s1','hl-s2','hl-s3']},
+{t:'DPDK dispatches parity shards P0, P1 over 200 GbE',
+ g:'storage node 1  ·  DPDK  ·  parity shard dispatch',
+ c:'for i := 4; i < 6; i++ {              // parity shards\n    mbuf := rte_pktmbuf_alloc(shard_pool)\n    rte_pktmbuf_attach_extbuf(mbuf, shards[i].DMABuf, 1<<20, &si)\n    rte_eth_tx_burst(eth_port, txq, &mbuf, 1)\n}  // same replication fabric — isolated from IB data plane',
+ p:[...ALL_D,...ALL_DI,...ALL_IS,...ALL_SN_D,...ALL_SN_P],h:['hl-s4','hl-s5']},
+{t:'Each node writes its shard to NVMe via SPDK blobstore',
+ g:'nodes 0–5  ·  SPDK blobstore  ·  PCIe 5.0 DMA  (parallel)',
+ c:'// Runs in parallel on all 6 receiving nodes:\nblobid := spdk_blob_create_sync(bs, clusters)\nblob   := spdk_blob_open_sync(bs, blobid)\nspdk_blob_io_write(blob, ch, dmaBuf, 0, pages,\n                   writeCb, NULL)  // PCIe 5.0 NVMe — no kernel',
+ p:[...ALL_D,...ALL_DI,...ALL_IS,...ALL_SN_D,...ALL_SN_P],h:['hl-n0','hl-n1','hl-n2','hl-n3','hl-n4','hl-n5']},
+{t:'All 6 ACKs returned — EC 4+2 stripe durable',
+ g:'nodes 0–5 → storage node 1  ·  stripe commit',
+ c:'stripe.MarkDurable(shardIdx, nodeID)   // per ACK received\nif stripe.AllShardsAck() {             // 6 / 6 committed\n    blobPutComplete(blobID)\n    // nixl_put() returns success to vLLM\n    // tolerates simultaneous loss of any 2 of 6 nodes\n}',
+ p:[...ALL_D,...ALL_DI,...ALL_IS,...ALL_SN_D,...ALL_SN_P],h:['hl-blob']},
+];
+let cur=0;
+const dr=document.getElementById('dots');
+S.forEach((_,i)=>{const d=document.createElement('div');d.style.cssText='width:7px;height:7px;border-radius:50%;transition:background .2s;background:#ccc';dr.appendChild(d)});
+function render(){
+  document.querySelectorAll('.fl').forEach(e=>e.classList.remove('on'));
+  for(let i=0;i<=cur;i++) S[i].p.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.querySelectorAll('.hl').forEach(e=>e.classList.remove('on'));
+  S[cur].h.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});
+  document.getElementById('ct').textContent=S[cur].g;
+  document.getElementById('ci').textContent=S[cur].t;
+  document.getElementById('cc').textContent=S[cur].c;
+  dr.querySelectorAll('div').forEach((d,i)=>d.style.background=i===cur?'#666':'#ccc');
+  document.getElementById('bp').disabled=cur===0;
+  document.getElementById('bn').disabled=cur===S.length-1;
+  document.getElementById('sn').textContent=`${cur+1} / ${S.length}`;
+}
+function go(d){cur=Math.max(0,Math.min(S.length-1,cur+d));render()}
+render();
+</script>
+</body>
+</html>
