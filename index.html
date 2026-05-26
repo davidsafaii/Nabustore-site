@@ -579,7 +579,7 @@
   /* ── Architecture overview ────────────────────────────────────── */
   .arch-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
     margin-top: 32px;
   }
@@ -587,17 +587,40 @@
   .arch-item {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-top: 3px solid var(--item-color, var(--border));
     border-radius: 10px;
-    padding: 20px;
+    padding: 28px 20px 20px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .arch-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px var(--item-glow, rgba(59,130,246,0.12));
+  }
+
+  .arch-item.tier-green  { --item-color: #10b981; --item-glow: rgba(16,185,129,0.2); }
+  .arch-item.tier-amber  { --item-color: #f59e0b; --item-glow: rgba(245,158,11,0.2); }
+  .arch-item.tier-blue   { --item-color: #3b82f6; --item-glow: rgba(59,130,246,0.2); }
+  .arch-item.tier-purple { --item-color: #8b5cf6; --item-glow: rgba(139,92,246,0.2); }
+  .arch-item.tier-cyan   { --item-color: #06b6d4; --item-glow: rgba(6,182,212,0.2); }
+
+  .arch-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: 12px;
   }
 
   .arch-item .tier {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--text-dim);
-    margin-bottom: 8px;
+    color: var(--item-color, var(--text-dim));
+    margin-bottom: 6px;
+    font-weight: 600;
   }
 
   .arch-item .name {
@@ -607,9 +630,26 @@
   }
 
   .arch-item .latency {
-    font-size: 0.8rem;
-    color: var(--green);
+    font-size: 0.82rem;
+    color: var(--item-color, var(--green));
     font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .speed-bar-wrap {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    margin-top: auto;
+    overflow: hidden;
+  }
+
+  .speed-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--item-color, var(--accent));
+    width: var(--bar-w, 50%);
   }
 
   /* ── Footer ───────────────────────────────────────────────────── */
@@ -1089,31 +1129,47 @@
   </p>
 
   <div class="arch-grid">
-    <div class="arch-item">
+
+    <div class="arch-item tier-green">
+      <div class="arch-icon">⚡</div>
       <div class="tier">L1 &mdash; Hot</div>
       <div class="name">DRAM</div>
       <div class="latency">~100 ns</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="--bar-w:100%"></div></div>
     </div>
-    <div class="arch-item">
+
+    <div class="arch-item tier-amber">
+      <div class="arch-icon">💎</div>
       <div class="tier">L2 &mdash; Warm</div>
       <div class="name">CXL Memory</div>
       <div class="latency">~200&ndash;300 ns</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="--bar-w:82%"></div></div>
     </div>
-    <div class="arch-item">
+
+    <div class="arch-item tier-blue">
+      <div class="arch-icon">💾</div>
       <div class="tier">L3 &mdash; Cold</div>
       <div class="name">NVMe SSD</div>
       <div class="latency">~100 &micro;s</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="--bar-w:30%"></div></div>
     </div>
-    <div class="arch-item">
+
+    <div class="arch-item tier-purple">
+      <div class="arch-icon">🗂️</div>
       <div class="tier">Index</div>
       <div class="name">Robin Hood Map</div>
       <div class="latency">CXL-backed mmap</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="--bar-w:78%"></div></div>
     </div>
-    <div class="arch-item">
+
+    <div class="arch-item tier-cyan">
+      <div class="arch-icon">🔗</div>
       <div class="tier">Data Plane</div>
       <div class="name">RDMA / DPDK</div>
       <div class="latency">&lt;2 &micro;s wire</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="--bar-w:55%"></div></div>
     </div>
+
   </div>
 </div>
 
