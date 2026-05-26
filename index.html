@@ -32,8 +32,21 @@
   .hero {
     text-align: center;
     padding: 80px 24px 60px;
-    background: linear-gradient(180deg, #000000 0%, var(--bg) 100%);
+    position: relative;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% -5%, rgba(59, 130, 246, 0.18) 0%, transparent 65%),
+      linear-gradient(180deg, #000000 0%, var(--bg) 100%);
     border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
   }
 
   .hero h1 {
