@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NabuStore - AI Inference Storage</title>
+<meta name="description" content="Kubernetes-native AI inference storage built for horizontal scalability. Sub-microsecond metadata lookups, 400 Gb/s RDMA fabric, and EC 8+2 erasure coding for GPU clusters.">
+<meta property="og:title" content="NabuStore — AI Inference Storage">
+<meta property="og:description" content="Kubernetes-native AI inference storage for GPU clusters. Sub-microsecond metadata lookups, 400 Gb/s RDMA, EC 8+2 erasure coding.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nabustore.com">
+<meta property="og:image" content="https://nabustore.com/nabustoreui.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NabuStore — AI Inference Storage">
+<meta name="twitter:description" content="Kubernetes-native AI inference storage for GPU clusters. Sub-microsecond metadata lookups, 400 Gb/s RDMA, EC 8+2 erasure coding.">
 <style>
   :root {
     --bg: #0a0e17;
@@ -49,15 +58,86 @@
     pointer-events: none;
   }
 
+  /* ── Top nav ──────────────────────────────────────────────────── */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topnav-brand {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .topnav-contact {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+
+  .topnav-contact:hover { color: var(--accent); }
+
   .hero h1 {
     font-size: 3.2rem;
     font-weight: 800;
     letter-spacing: -0.03em;
     margin-bottom: 8px;
-    background: #000000;
+    background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+
+  /* ── CTA buttons ──────────────────────────────────────────────── */
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 28px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); transform: translateY(-1px); }
 
   .hero .tagline {
     font-size: 1.25rem;
@@ -512,21 +592,25 @@
 </style>
 </head>
 <body>
-<div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1;">
-  <a href="mailto:contact@nabustore.com" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;">
-    contact@nabustore.com
-  </a>
-</div>
+<nav class="topnav">
+  <span class="topnav-brand">NabuStore</span>
+  <a href="mailto:contact@nabustore.com" class="topnav-contact">contact@nabustore.com</a>
+</nav>
 <!-- ── Hero ──────────────────────────────────────────────────────── -->
 <div class="hero">
  
 <img src="nabu-logo.png" alt="Nabu Store" style="height: 240px; margin-bottom: 1rem; mix-blend-mode: screen;">
-  
+  <h1>AI Inference Storage for GPU Clusters</h1>
   <p class="tagline">
     Kubernetes-native AI inference storage built for horizontal scalability.
     Handles model weights, KV cache blobs, and checkpoints across distributed
     GPU clusters with sub-microsecond metadata lookups.
   </p>
+
+  <div class="hero-cta">
+    <a href="https://github.com/nabustore/nabustore" class="btn-primary">Star on GitHub</a>
+    <a href="https://docs.wabam.ai/nabustore" class="btn-secondary">Read the Docs →</a>
+  </div>
 
   <div class="badges">
     <span class="badge"><span class="dot green"></span> Apache 2.0</span>
