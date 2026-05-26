@@ -91,6 +91,19 @@
     pointer-events: none;
   }
 
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -18%;
+    width: 62%;
+    aspect-ratio: 1 / 1;
+    background: url('nabu-logo.png') center / contain no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.22;
+    pointer-events: none;
+  }
+
   /* ── Top nav ──────────────────────────────────────────────────── */
   .topnav {
     position: sticky;
