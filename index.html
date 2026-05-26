@@ -499,18 +499,82 @@
   /* ── Footer ───────────────────────────────────────────────────── */
   footer {
     border-top: 1px solid var(--border);
-    padding: 40px 24px;
-    text-align: center;
+    padding: 56px 24px 32px;
     color: var(--text-dim);
     font-size: 0.85rem;
   }
 
-  footer a {
-    color: var(--accent);
+  .footer-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  .footer-brand .footer-logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .footer-brand p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 280px;
+  }
+
+  .footer-col h4 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-col a {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-col a:hover { color: var(--accent); }
+
+  .footer-bottom {
+    max-width: 1100px;
+    margin: 28px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .footer-bottom a {
+    color: var(--text-dim);
     text-decoration: none;
   }
 
-  footer a:hover { text-decoration: underline; }
+  .footer-bottom a:hover { color: var(--accent); }
 
   /* ── Modal ────────────────────────────────────────────────────── */
   .modal-overlay {
@@ -912,11 +976,38 @@
 
 <!-- ── Footer ───────────────────────────────────────────────────── -->
 <footer>
-  <p>
-    NabuStore &mdash; Apache 2.0 &mdash;
-    <a href="https://github.com/nabustore/nabustore">GitHub</a> &middot;
-    <a href="https://docs.wabam.ai/nabustore">Documentation</a>
-  </p>
+  <div class="footer-grid">
+
+    <div class="footer-brand">
+      <div class="footer-logo">NabuStore</div>
+      <p>Blob-native, kernel-free, GPU-direct storage built for AI inference workloads at scale. Apache 2.0 open source.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Project</h4>
+      <ul>
+        <li><a href="https://github.com/nabustore/nabustore">GitHub</a></li>
+        <li><a href="https://docs.wabam.ai/nabustore">Documentation</a></li>
+        <li><a href="https://github.com/nabustore/nabustore/blob/main/LICENSE">Apache 2.0 License</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:contact@nabustore.com">contact@nabustore.com</a></li>
+      </ul>
+      <p style="margin-top: 16px; font-size: 0.78rem; line-height: 1.6;">
+        Built in Go &middot; Runs on Kubernetes<br>
+        Designed for GPU clusters
+      </p>
+    </div>
+
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025 NabuStore. All rights reserved.</span>
+    <span>Apache 2.0 &mdash; Free to use, modify, and distribute.</span>
+  </div>
 </footer>
 
 <!-- ── Modal ─────────────────────────────────────────────────────── -->
