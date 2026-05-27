@@ -885,6 +885,58 @@
     /* Technique cards: single column */
     .cards { grid-template-columns: 1fr; }
 
+    /* Comparison table: card-stack layout */
+    .table-scroll { overflow-x: unset; margin-top: 24px; }
+    .table-scroll .comp-table { min-width: unset; }
+
+    .comp-table,
+    .comp-table thead,
+    .comp-table tbody,
+    .comp-table tr,
+    .comp-table th,
+    .comp-table td { display: block; width: 100%; }
+
+    .comp-table thead { display: none; }
+
+    .comp-table tbody tr {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .comp-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      border-right: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .comp-table td:last-child { border-bottom: none; }
+
+    .comp-table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 5px;
+      opacity: 0.55;
+      color: var(--text);
+    }
+
+    .comp-table .attr {
+      background: rgba(59,130,246,0.07);
+      font-size: 0.9rem;
+      white-space: normal;
+      width: 100%;
+    }
+
+    .comp-table .bad { width: 100%; }
+    .comp-table .good { width: 100%; }
+
     /* Storage tier: 2 columns */
     .arch-grid { grid-template-columns: 1fr 1fr; }
 
@@ -996,38 +1048,38 @@
     <tbody>
       <tr>
         <td class="attr">I/O Pattern</td>
-        <td class="bad">Random reads and writes. Applications depend on in-place modification, POSIX locking, and byte-range updates.</td>
-        <td class="good">Write-once / read-many. Model weights, checkpoints, and training samples are immutable blobs. No random writes needed.</td>
+        <td class="bad" data-label="Traditional Storage">Random reads and writes. Applications depend on in-place modification, POSIX locking, and byte-range updates.</td>
+        <td class="good" data-label="AI-Native Storage">Write-once / read-many. Model weights, checkpoints, and training samples are immutable blobs. No random writes needed.</td>
       </tr>
       <tr>
         <td class="attr">Protocol</td>
-        <td class="bad">NFS, iSCSI, SMB — designed for spinning disk over TCP. Kernel-mediated I/O with multiple context switches per operation.</td>
-        <td class="good">NVMe-oF over RDMA, GPUDirect Storage, CXL. Kernel-bypassed via DPDK/SPDK. Zero-copy from NVMe directly into GPU HBM.</td>
+        <td class="bad" data-label="Traditional Storage">NFS, iSCSI, SMB — designed for spinning disk over TCP. Kernel-mediated I/O with multiple context switches per operation.</td>
+        <td class="good" data-label="AI-Native Storage">NVMe-oF over RDMA, GPUDirect Storage, CXL. Kernel-bypassed via DPDK/SPDK. Zero-copy from NVMe directly into GPU HBM.</td>
       </tr>
       <tr>
         <td class="attr">Latency Target</td>
-        <td class="bad">Milliseconds acceptable. HDD-era designs persist even on all-flash arrays due to legacy software stack overhead.</td>
-        <td class="good">Microseconds required. GPU costs $30k+ — every microsecond of idle GPU is measurable dollar waste. Sub-250&micro;s is baseline.</td>
+        <td class="bad" data-label="Traditional Storage">Milliseconds acceptable. HDD-era designs persist even on all-flash arrays due to legacy software stack overhead.</td>
+        <td class="good" data-label="AI-Native Storage">Microseconds required. GPU costs $30k+ — every microsecond of idle GPU is measurable dollar waste. Sub-250&micro;s is baseline.</td>
       </tr>
       <tr>
         <td class="attr">Bottleneck</td>
-        <td class="bad">IOPS and capacity. Scale-up storage controllers dominate. Single-threaded I/O stacks inherited from HDD era.</td>
-        <td class="good">Bandwidth and parallelism. Thousands of GPU cores demand simultaneous access. Scale-out across commodity nodes is mandatory.</td>
+        <td class="bad" data-label="Traditional Storage">IOPS and capacity. Scale-up storage controllers dominate. Single-threaded I/O stacks inherited from HDD era.</td>
+        <td class="good" data-label="AI-Native Storage">Bandwidth and parallelism. Thousands of GPU cores demand simultaneous access. Scale-out across commodity nodes is mandatory.</td>
       </tr>
       <tr>
         <td class="attr">New Primitives</td>
-        <td class="bad">No concept of KV cache, embedding vectors, or tensor blobs. Filesystems expose bytes and blocks — not AI-meaningful data units.</td>
-        <td class="good">KV cache offload/sharing, vector embedding storage, content-addressable tensor blobs, and GPU-DMA-aligned chunking are first-class.</td>
+        <td class="bad" data-label="Traditional Storage">No concept of KV cache, embedding vectors, or tensor blobs. Filesystems expose bytes and blocks — not AI-meaningful data units.</td>
+        <td class="good" data-label="AI-Native Storage">KV cache offload/sharing, vector embedding storage, content-addressable tensor blobs, and GPU-DMA-aligned chunking are first-class.</td>
       </tr>
       <tr>
         <td class="attr">Hardware Model</td>
-        <td class="bad">Proprietary controllers (Pure DirectFlash, NetApp ONTAP ASIC). Vendor lock-in is a feature — margins depend on it.</td>
-        <td class="good">Commodity NVMe + RDMA NICs on standard x86. Software defines all performance. Hardware is fungible and replaceable.</td>
+        <td class="bad" data-label="Traditional Storage">Proprietary controllers (Pure DirectFlash, NetApp ONTAP ASIC). Vendor lock-in is a feature — margins depend on it.</td>
+        <td class="good" data-label="AI-Native Storage">Commodity NVMe + RDMA NICs on standard x86. Software defines all performance. Hardware is fungible and replaceable.</td>
       </tr>
       <tr>
         <td class="attr">Moat</td>
-        <td class="bad">Hardware, support contracts, installed base inertia. Winner-take-most dynamics already resolved (NetApp, Pure, Dell EMC).</td>
-        <td class="good">Software architecture, AI-primitive integration (NIXL, CUDA, PyTorch), protocol leadership. Category not yet decided.</td>
+        <td class="bad" data-label="Traditional Storage">Hardware, support contracts, installed base inertia. Winner-take-most dynamics already resolved (NetApp, Pure, Dell EMC).</td>
+        <td class="good" data-label="AI-Native Storage">Software architecture, AI-primitive integration (NIXL, CUDA, PyTorch), protocol leadership. Category not yet decided.</td>
       </tr>
     </tbody>
   </table>
