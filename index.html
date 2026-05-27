@@ -658,6 +658,77 @@
     width: var(--bar-w, 50%);
   }
 
+  /* ── FAQ ─────────────────────────────────────────────────────── */
+  .faq-list {
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 0;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-align: left;
+    transition: color 0.2s;
+  }
+
+  .faq-question:hover { color: var(--accent); }
+
+  .faq-icon {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    line-height: 1;
+    transition: transform 0.25s ease, color 0.2s;
+  }
+
+  .faq-item.open .faq-icon {
+    transform: rotate(45deg);
+    color: var(--accent);
+  }
+
+  .faq-item.open .faq-question { color: var(--accent); }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    padding-bottom: 0;
+  }
+
+  .faq-item.open .faq-answer {
+    max-height: 400px;
+    padding-bottom: 24px;
+  }
+
+  .faq-answer p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .faq-answer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .faq-answer a:hover { text-decoration: underline; }
+
   /* ── Footer ───────────────────────────────────────────────────── */
   footer {
     border-top: 1px solid var(--border);
@@ -1309,6 +1380,66 @@
   </div>
 </div>
 
+<!-- ── FAQ ───────────────────────────────────────────────────────── -->
+<div class="section" id="faq">
+  <h2>Frequently Asked Questions</h2>
+  <p class="subtitle">Common questions about NabuStore.</p>
+
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <button class="faq-question">
+        Is NabuStore production ready?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>NabuStore is in active early-stage development. The core blob storage engine, DHT ring routing, and NVMe-oF/RDMA data paths are functional, but the project is not yet recommended for production workloads. We welcome early adopters who want to evaluate the technology, run benchmarks, and help shape the roadmap. Reach out at <a href="mailto:contact@nabustore.com">contact@nabustore.com</a> if you'd like to discuss your use case.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        What hardware does NabuStore require?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>NabuStore runs on commodity hardware — no proprietary controllers required. You need standard x86 servers with NVMe SSDs, RDMA-capable NICs (e.g. NVIDIA ConnectX-6/7), and a Kubernetes cluster. A 3-node cluster is sufficient for evaluation. For production-grade performance, we recommend 100 GbE or InfiniBand NDR fabric and PCIe 5.0 NVMe drives.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        How does NabuStore compare to solutions like Weka or VAST?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>Weka and VAST are excellent general-purpose storage platforms. NabuStore is a specialist: purpose-built for AI inference I/O patterns (write-once / read-many blobs), with kernel-bypassed data paths via SPDK and DPDK, native KV cache lifecycle management, and sub-microsecond metadata lookups via CXL-backed indexing. If you need a general-purpose filesystem, NabuStore is not the right tool. If you're running GPU inference clusters at scale, it is.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        How do I get started?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>The best starting point is the <a href="https://github.com/nabustore/nabustore" target="_blank" rel="noopener noreferrer">GitHub repository</a> and the <a href="https://docs.wabam.ai/nabustore" target="_blank" rel="noopener noreferrer">documentation</a>, which includes a reference architecture, deployment guides, and Kubernetes operator manifests. For questions or to discuss your specific environment, open a GitHub issue or email <a href="mailto:contact@nabustore.com">contact@nabustore.com</a>.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        How can I contribute?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>NabuStore is Apache 2.0 open source and actively welcomes contributions. Browse <a href="https://github.com/nabustore/nabustore/issues" target="_blank" rel="noopener noreferrer">open issues on GitHub</a> for good first issues, review the plugin architecture docs if you want to extend the storage layer, or reach out directly to discuss a larger contribution or infrastructure integration.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ── Footer ───────────────────────────────────────────────────── -->
 <footer>
   <div class="footer-grid">
@@ -1379,6 +1510,16 @@
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-question').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var item = btn.closest('.faq-item');
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+      if (!isOpen) item.classList.add('open');
+    });
   });
 
   // Scroll progress bar
