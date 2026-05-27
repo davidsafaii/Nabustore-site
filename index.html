@@ -537,9 +537,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     margin-bottom: 16px;
-    font-weight: 700;
   }
 
   .card .icon.blue   { background: #1e3a5f; color: #60a5fa; }
@@ -1020,7 +1019,7 @@
   <div class="cards">
 
     <a class="card" href="ref-arch-v2.html">
-      <div class="icon blue">A</div>
+      <div class="icon blue">📐</div>
       <h3>Reference Architecture</h3>
       <p>
         The complete blueprint: five design principles, full software stack
@@ -1038,7 +1037,7 @@
     </a>
 
     <div class="card" onclick="openModal('Storage Node Architecture', 'storage_node_architecture.html')">
-      <div class="icon blue">N</div>
+      <div class="icon blue">🗄️</div>
       <h3>Storage Node Architecture</h3>
       <p>
         Complete hardware and software stack of a NabuStore node: vLLM integration,
@@ -1056,7 +1055,7 @@
     </div>
 
     <div class="card" onclick="openModal('Blob Transfer via NVMe-oF &amp; RDMA', 'blob_transfer_nvmeof_rdma.html')">
-      <div class="icon green">R</div>
+      <div class="icon green">⚡</div>
       <h3>Blob Transfer via NVMe-oF &amp; RDMA</h3>
       <p>
         Zero-copy GPU blob retrieval: NIXL request triggers DHT lookup,
@@ -1074,7 +1073,7 @@
     </div>
 
     <div class="card" onclick="openModal('DPDK Blob Replication Pipeline', 'dpdk_blob_replication.html')">
-      <div class="icon purple">D</div>
+      <div class="icon purple">🔄</div>
       <h3>DPDK Blob Replication Pipeline</h3>
       <p>
         Userspace replication using DPDK poll-mode drivers: EC shards encoded
@@ -1092,7 +1091,7 @@
     </div>
 
     <div class="card" onclick="openModal('EC 4+2 Blob Write Pipeline', 'ec42_blob_write_pipeline.html')">
-      <div class="icon orange">E</div>
+      <div class="icon orange">🛡️</div>
       <h3>EC 4+2 Blob Write Pipeline</h3>
       <p>
         Step-by-step erasure-coded write: 4 MB blob split into 4 data shards,
@@ -1110,7 +1109,7 @@
     </div>
 
     <a class="card" href="plugin_arch_docs.html">
-      <div class="icon red">P</div>
+      <div class="icon red">🧩</div>
       <h3>Plugin Architecture</h3>
       <p>
         Three-tier extensibility model: Tier 1 static registry (init()-based,
