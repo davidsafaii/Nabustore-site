@@ -810,15 +810,17 @@
     border: none;
   }
 
-  /* ── Storage Tiers subtitle: single line on desktop ──────────── */
-  #tiers .subtitle {
+  /* ── Single-line subtitles on desktop ────────────────────────── */
+  #tiers .subtitle,
+  #techniques .subtitle {
     max-width: none;
     white-space: nowrap;
   }
 
   /* ── Responsive ───────────────────────────────────────────────── */
   @media (max-width: 1100px) {
-    #tiers .subtitle { white-space: normal; }
+    #tiers .subtitle,
+    #techniques .subtitle { white-space: normal; }
   }
 
   @media (max-width: 640px) {
